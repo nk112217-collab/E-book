@@ -1,0 +1,2731 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>मेरी इतिहास की डिजिटल किताब</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #e5e5f7;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 4px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* इमर्सिव मोड */
+    body.immersive-mode .author-bar,
+    body.immersive-mode .page-header,
+    body.immersive-mode .controls {
+      display: none !important;
+    }
+    body.immersive-mode {
+      padding: 0;
+    }
+    body.immersive-mode .book-container {
+      border-radius: 0;
+      border: none;
+      margin-bottom: 0;
+    }
+
+    /* डार्क मोड */
+    body.dark-mode {
+      background-color: #121212 !important;
+      color: #e0e0e0 !important;
+    }
+    body.dark-mode .book-container {
+      background: #1e1e1e !important;
+      border-color: #333333 !important;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    }
+    body.dark-mode .zoom-btn-group {
+      background: #333333 !important;
+    }
+    body.dark-mode .font-zoom-btn,
+    body.dark-mode .header-tool-btn,
+    body.dark-mode .header-font-select {
+      background: #2a2a2a !important;
+      border-color: #444 !important;
+      color: #e0e0e0 !important;
+    }
+    body.dark-mode .page-content,
+    body.dark-mode .under-page {
+      color: #e0e0e0 !important;
+      background: #1e1e1e !important;
+    }
+    body.dark-mode .page-content:empty:before {
+      color: #666 !important;
+    }
+    body.dark-mode .controls {
+      background: #121212 !important;
+    }
+    body.dark-mode .modal-box {
+      background: #242424 !important;
+      color: #eee !important;
+      border: 1px solid #444 !important;
+    }
+    body.dark-mode .modal-header {
+      border-bottom-color: #383838 !important;
+    }
+    body.dark-mode .floating-word-badge {
+      background: rgba(40, 40, 40, 0.85) !important;
+      color: #aaa !important;
+      border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    /* नोट बॉक्स स्टाइल */
+    .history-note {
+      position: relative;
+      border-radius: 8px;
+      padding: 12px 16px 12px 20px;
+      margin: 12px 0;
+      font-size: 1em;
+      line-height: 1.7;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      background-color: #fffbf0;
+      border: 1px solid #d9cbaf;
+      color: #222;
+      outline: none;
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
+      white-space: pre-wrap;
+    }
+    body.dark-mode .history-note {
+      background-color: #2c2c2c !important;
+      border: 1px solid #555555 !important;
+      color: #f1f1f1 !important;
+    }
+    .history-note * {
+      font-size: inherit !important;
+      max-width: 100%;
+    }
+    .history-note-title {
+      font-weight: bold;
+      color: #7f4f14;
+      margin-right: 4px;
+    }
+    body.dark-mode .history-note-title {
+      color: #ffb74d !important;
+    }
+    .history-note ul, .history-note ol {
+      padding-left: 18px;
+      margin: 4px 0;
+    }
+
+    .book-container {
+      width: 100%;
+      max-width: 680px;
+      background: #fffdf9;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+      border-radius: 10px;
+      border: 1px solid #dcd6cd;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+      margin-bottom: 4px;
+      position: relative;
+      transition: background-color 0.3s ease;
+    }
+
+    .page-header {
+      background: #f4ece1;
+      padding: 6px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      border-bottom: 1px solid #e0d5c1;
+      font-size: 13px;
+      font-weight: bold;
+      color: #555;
+      flex-shrink: 0;
+      z-index: 20;
+      transition: background-color 0.3s ease;
+    }
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      gap: 4px;
+    }
+    .header-tool-btn {
+      background: #ffffff;
+      border: 1px solid #c2b59b;
+      color: #333;
+      padding: 4px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      font-weight: bold;
+      user-select: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 28px;
+      box-sizing: border-box;
+      white-space: nowrap;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .header-font-select {
+      background: #ffffff;
+      color: #222;
+      border: 1px solid #c2b59b;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      font-weight: bold;
+      max-width: 120px;
+      height: 28px;
+      box-sizing: border-box;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .zoom-btn-group {
+      display: flex;
+      gap: 3px;
+      align-items: center;
+      justify-content: center;
+      background: #e8ded1;
+      padding: 2px 4px;
+      border-radius: 5px;
+      height: 28px;
+      box-sizing: border-box;
+    }
+    .font-zoom-btn {
+      background: #ffffff;
+      border: 1px solid #c2b59b;
+      color: #333;
+      font-weight: bold;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      min-width: 28px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      box-sizing: border-box;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    body.is-locked .undo-redo-btn {
+      display: none !important;
+    }
+
+    #themeToggleBtn {
+      min-width: 30px;
+      font-size: 13px;
+    }
+    .mode-btn {
+      background: #2b5c8f;
+      color: white;
+      border: none;
+      padding: 4px 9px;
+      border-radius: 4px;
+      font-size: 11.5px;
+      cursor: pointer;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .author-bar {
+      background: #1c2b3d;
+      padding: 6px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 680px;
+      border-radius: 8px;
+      margin-bottom: 4px;
+      flex-shrink: 0;
+      gap: 4px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+      overflow-x: auto;
+      transition: background-color 0.3s ease;
+    }
+    .author-bar.hidden {
+      display: none;
+    }
+    .author-btn-group {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      flex: 1;
+      justify-content: flex-start;
+      min-width: max-content;
+    }
+    .tool-btn {
+      background: #d8be91;
+      color: #3a2813;
+      border: 1px solid #b89d6e;
+      padding: 5px 8px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      white-space: nowrap;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    .clear-page-btn {
+      background: #c0392b;
+      color: white;
+      border: 1px solid #962d22;
+    }
+    .publish-btn {
+      background: #2e7d32;
+      color: white;
+      border: none;
+      padding: 5px 8px;
+      border-radius: 5px;
+      font-size: 10.5px;
+      font-weight: bold;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .book-stage {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      perspective: 1800px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      touch-action: pan-y;
+      background-color: #241c14;
+    }
+
+    /* नीचे वाला पेज: बाहरी किनारे पर उजाला और अंदर की तरफ गहराई (छांव) */
+    .under-page {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 48px 16px 45px 16px;
+      font-size: 17px;
+      line-height: 1.8;
+      color: #222;
+      /* ग्रेडिएंट: बाहर की तरफ हल्का (रोशनी) और अंदर क्रीज की तरफ गहरा (छांव) */
+      background: linear-gradient(to right, #fffaf2 0%, #f0e2d0 45%, #cdb9a2 100%);
+      box-shadow: inset 30px 0 60px rgba(0, 0, 0, 0.3);
+      overflow-y: auto;
+      overflow-x: hidden;
+      text-align: justify;
+      word-wrap: break-word;
+      word-break: break-word;
+      z-index: 1;
+      display: none;
+      pointer-events: none;
+    }
+
+    .page-content {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 48px 16px 50px 16px;
+      outline: none;
+      font-size: 17px;
+      line-height: 1.8;
+      color: #222;
+      background: #fffdf9;
+      overflow-y: auto;
+      overflow-x: hidden;
+      text-align: justify;
+      word-wrap: break-word;
+      word-break: break-word;
+      z-index: 2;
+      transform-style: preserve-3d;
+      backface-visibility: hidden;
+      will-change: transform, opacity;
+      -webkit-user-select: text !important;
+      user-select: text !important;
+      box-shadow: -8px 0 25px rgba(0,0,0,0.12);
+    }
+    .page-content:empty:before {
+      content: attr(placeholder);
+      color: #aaa;
+    }
+
+    u {
+      text-decoration: underline;
+      text-decoration-color: #2b5c8f;
+      text-underline-offset: 4px;
+      text-decoration-thickness: 2px;
+    }
+
+    h1 { font-size: 1.6em; font-weight: bold; margin: 10px 0; line-height: 1.4; }
+    h2 { font-size: 1.3em; font-weight: bold; margin: 8px 0; line-height: 1.4; }
+    h3 { font-size: 1.15em; font-weight: bold; margin: 6px 0; line-height: 1.4; }
+
+    .custom-active-target {
+      outline: 2px dashed #2b5c8f !important;
+      outline-offset: 3px;
+      border-radius: 4px;
+      background-color: rgba(43, 92, 143, 0.08);
+    }
+    body.dark-mode .custom-active-target {
+      outline-color: #90caf9 !important;
+      background-color: rgba(144, 202, 249, 0.12);
+    }
+
+    .floating-word-badge {
+      position: absolute;
+      bottom: 8px;
+      right: 12px;
+      background: rgba(244, 236, 225, 0.65);
+      color: #555;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: bold;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      backdrop-filter: blur(4px);
+      z-index: 10;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* फ्लोटिंग क्विक एक्शन बटन */
+    #floatingFormatBtn {
+      display: none;
+      position: absolute;
+      z-index: 99999;
+      background: #2b5c8f;
+      color: white;
+      border: 2px solid #ffffff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .delete-item-btn {
+      position: absolute;
+      top: 4px;
+      right: 6px;
+      background: #d9534f;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 11px;
+      cursor: pointer;
+      line-height: 18px;
+      text-align: center;
+      user-select: none;
+      z-index: 10;
+    }
+    body.is-locked .delete-item-btn {
+      display: none;
+    }
+    .history-image-card {
+      position: relative;
+      text-align: center;
+      margin: 12px auto;
+      padding: 6px;
+      background: #fdfaf5;
+      border: 1px solid #e0d5c1;
+      border-radius: 8px;
+      max-width: 90%;
+    }
+    .history-image-card img {
+      max-width: 100%;
+      max-height: 220px;
+      border-radius: 6px;
+      object-fit: contain;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .image-caption {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+      font-style: italic;
+      outline: none;
+    }
+    .video-card-wrapper {
+      margin: 12px 0;
+      display: inline-block;
+      width: 100%;
+    }
+    .video-link-card {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff0f0;
+      border: 1.5px solid #ff0000;
+      color: #c00;
+      padding: 8px 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: bold;
+      user-select: none;
+    }
+    .map-trigger-card {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #eef5fc;
+      border: 1.5px dashed #2b5c8f;
+      color: #1a446c;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin: 10px 0;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: bold;
+      user-select: none;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000000;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 15px;
+    }
+
+    .modal.bottom-align {
+      justify-content: flex-end !important;
+      padding: 0 10px 10px 10px !important;
+    }
+
+    #shadowStylesModal {
+      z-index: 1000005 !important;
+      background: rgba(0, 0, 0, 0.4) !important;
+    }
+
+    .modal-content {
+      max-width: 95%;
+      max-height: 80vh;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(255,255,255,0.2);
+    }
+    .close-btn {
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      cursor: pointer;
+      align-self: flex-end;
+      margin-right: 20px;
+    }
+
+    .modal-box {
+      width: 92%;
+      max-width: 380px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 16px;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #eee;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .modal-close {
+      font-size: 22px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #888;
+    }
+    .modal-list {
+      flex: 1;
+      overflow-y: auto;
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 340px;
+    }
+
+    .select-opt-btn {
+      background: #f8f8fc;
+      border: 1.5px solid #dcd6cd;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: bold;
+      color: #333;
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .select-opt-btn:hover {
+      background: #eef5fc;
+      border-color: #2b5c8f;
+    }
+    body.dark-mode .select-opt-btn {
+      background: #2a2a2a !important;
+      border-color: #444 !important;
+      color: #eee !important;
+    }
+
+    .text-hierarchy-item {
+      background: #ffffff;
+      border: 1.5px solid #e0d5c1;
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .text-hierarchy-item:hover {
+      background: #fdf6ec;
+      border-color: #2b5c8f;
+      transform: translateX(2px);
+    }
+    body.dark-mode .text-hierarchy-item {
+      background: #2a2a2a;
+      border-color: #444;
+      color: #e0e0e0;
+    }
+    body.dark-mode .text-hierarchy-item:hover {
+      background: #333;
+      border-color: #90caf9;
+    }
+
+    .fmt-group-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .modal-fmt-btn {
+      background: #f0f4f8;
+      border: 1.5px solid #cbd5e1;
+      color: #1e293b;
+      padding: 10px 6px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      flex: 1;
+      text-align: center;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    .modal-fmt-btn:active {
+      transform: scale(0.96);
+      background: #e2e8f0;
+    }
+    
+    .modal-fmt-btn.u-hold-active {
+      background: #e65100 !important;
+      color: #ffffff !important;
+      border: 2px solid #ffb74d !important;
+      box-shadow: 0 0 8px rgba(230, 81, 0, 0.6);
+    }
+
+    body.dark-mode .modal-fmt-btn {
+      background: #333333;
+      border-color: #555555;
+      color: #f1f1f1;
+    }
+
+    .modal-color-dot {
+      height: 28px;
+      flex: 1;
+      max-width: 32px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      cursor: pointer;
+      display: inline-block;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      transition: transform 0.1s;
+    }
+    .modal-color-dot:active {
+      transform: scale(1.15);
+    }
+
+    /* ibis Paint X स्टाइल 2D कलर पिकर */
+    .ibis-picker-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+      user-select: none;
+    }
+    .ibis-sat-val-canvas {
+      width: 100%;
+      height: 150px;
+      border-radius: 8px;
+      cursor: crosshair;
+      touch-action: none;
+      box-shadow: inset 0 0 4px rgba(0,0,0,0.3);
+      border: 1.5px solid #bbb;
+    }
+    .ibis-hue-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 20px;
+      border-radius: 10px;
+      outline: none;
+      background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%);
+      box-shadow: inset 0 0 3px rgba(0,0,0,0.4);
+      cursor: pointer;
+    }
+    .ibis-hue-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2.5px solid #222;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+      cursor: pointer;
+    }
+    .ibis-color-info-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: #f3f3f8;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+    body.dark-mode .ibis-color-info-row {
+      background: #2a2a2a;
+      border-color: #444;
+    }
+    .ibis-preview-box {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      border: 2px solid #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+    .ibis-scope-badge {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+      margin-top: 4px;
+    }
+    .ibis-scope-btn {
+      flex: 1;
+      padding: 7px 4px;
+      font-size: 11.5px;
+      font-weight: bold;
+      border-radius: 6px;
+      border: 1.5px solid #ccc;
+      background: #fff;
+      cursor: pointer;
+    }
+    .ibis-scope-btn.active {
+      background: #2b5c8f;
+      color: #fff;
+      border-color: #2b5c8f;
+    }
+
+    .controls {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      background: #e5e5f7;
+      padding: 6px 0;
+      z-index: 20;
+    }
+    button.nav-btn {
+      background-color: #2b5c8f;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+      flex: 1;
+    }
+    button:disabled {
+      background-color: #a0b2c6;
+      cursor: not-allowed;
+    }
+    .jump-box {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .jump-box input {
+      width: 60px;
+      padding: 8px;
+      text-align: center;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- स्मार्ट फ्लोटिंग बटन -->
+  <button id="floatingFormatBtn" onclick="applyNativeSelectionFormat()">✨ फ़ॉर्मेट करें</button>
+
+  <div class="author-bar" id="authorBar">
+    <div class="author-btn-group">
+      <button class="tool-btn" id="btn_note" onclick="openNoteColorModal()">📌 नोट</button>
+      <button class="tool-btn" id="btn_photo" onclick="document.getElementById('imgFileInput').click()">🖼️ फोटो</button>
+      <button class="tool-btn" id="btn_video" onclick="insertVideoLink()">▶️ वीडियो</button>
+      <button class="tool-btn" id="btn_map" onclick="document.getElementById('mapFileInput').click()">🗺️ मानचित्र</button>
+      <button class="tool-btn clear-page-btn" id="btn_clear" onclick="clearCurrentPage()">🧹 साफ़ करें</button>
+    </div>
+    <button class="publish-btn" id="btn_publish" onclick="publishCompleteBook()">📤 पब्लिश</button>
+    
+    <input type="file" id="imgFileInput" accept="image/*" style="display:none" onchange="handleImageUpload(event)">
+    <input type="file" id="mapFileInput" accept="image/*" style="display:none" onchange="handleMapUpload(event)">
+  </div>
+
+  <div class="book-container" id="bookContainer">
+    <div class="page-header" id="pageHeader">
+      <div class="header-row">
+        <span id="pageLabel" style="font-size:12.5px; min-width: 85px; white-space: nowrap;">पेज: 1 / 1000</span>
+        <div style="display:flex; gap:3px; align-items: center; overflow-x: auto;">
+          <button class="header-tool-btn" id="btn_select" onclick="openSelectModal()" title="सेलेक्ट मेन्यू" style="font-size:10.5px; padding:3px 6px;">🎯 सेलेक्ट</button>
+          <button class="header-tool-btn" id="btn_slide" onclick="toggleSlideMode()" title="स्वाइप ऑन/ऑफ" style="font-size:10.5px; padding:3px 5px;">↔️ स्लाइड</button>
+          <button class="header-tool-btn" id="btn_index" onclick="openIndexModal()" title="सूची" style="font-size:10.5px; padding:3px 5px;">📑 सूची</button>
+        </div>
+      </div>
+      
+      <div class="header-row">
+        <select class="header-font-select" onchange="changeBookFont(this.value)" id="fontSelector">
+          <option value="modern" selected>मॉडर्न (Segoe)</option>
+          <option value="classic">क्लासिक (Georgia)</option>
+          <option value="traditional">पारंपरिक (Mangal)</option>
+          <option value="italic">आगे झुके हुए</option>
+          <option value="oblique">पीछे झुके हुए</option>
+        </select>
+        <div class="zoom-btn-group">
+          <button class="font-zoom-btn undo-redo-btn" id="btn_undo" onpointerdown="event.preventDefault(); triggerUndo();" title="Undo">↶</button>
+          <button class="font-zoom-btn undo-redo-btn" id="btn_redo" onpointerdown="event.preventDefault(); triggerRedo();" title="Redo">↷</button>
+        </div>
+        <div style="display:flex; gap:4px; align-items:center;">
+          <button id="themeToggleBtn" class="header-tool-btn" onclick="toggleDarkMode()" title="डार्क / लाइट मोड">🌙</button>
+          <button id="lockToggleBtn" class="mode-btn" onclick="toggleLockMode()">🔒 लॉक</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="book-stage" id="bookStage">
+      <div id="underPage" class="under-page"></div>
+      <div id="pageText" class="page-content" contenteditable="true" spellcheck="false" placeholder="यहाँ इतिहास लिखना शुरू करें..."></div>
+      <div id="wordCountLabel" class="floating-word-badge">कुल शब्द: 0</div>
+    </div>
+  </div>
+
+  <div class="controls" id="navControls">
+    <button id="prevBtn" class="nav-btn" onclick="loadPageInstant(currentPage - 1)">पिछला</button>
+    <div class="jump-box">
+      <input type="number" id="jumpInput" min="1" max="1000" value="1" onchange="jumpToPage()">
+      <button style="flex: none; padding: 10px 12px; background: #2b5c8f; color: white; border: none; border-radius: 6px; cursor: pointer; font-size:15px;" onclick="jumpToPage()">जाएं</button>
+    </div>
+    <button id="nextBtn" class="nav-btn" onclick="loadPageInstant(currentPage + 1)">अगला</button>
+  </div>
+
+  <!-- 1. मुख्य सेलेक्ट मोडल विंडो -->
+  <div id="selectModal" class="modal" style="background: rgba(0,0,0,0.6);">
+    <div class="modal-box" style="max-width: 320px;">
+      <div class="modal-header">
+        <span>🎯 सेलेक्ट विकल्प</span>
+        <span class="modal-close" onclick="closeSelectModal()">×</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+        <button class="select-opt-btn" onclick="handleSelectAction('text')">
+          <span style="font-size: 18px;">📄</span>
+          <span>टेक्स्ट</span>
+        </button>
+        <button class="select-opt-btn" onclick="handleSelectAction('body')">
+          <span style="font-size: 18px;">📦</span>
+          <span>बॉडी</span>
+        </button>
+        <button class="select-opt-btn" onclick="handleSelectAction('background')">
+          <span style="font-size: 18px;">🎨</span>
+          <span>बैकग्राउंड</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1.1 बॉडी मुख्य सेलेक्शन मोडल -->
+  <div id="bodySelectModal" class="modal" style="background: rgba(0,0,0,0.6);">
+    <div class="modal-box" style="max-width: 340px;">
+      <div class="modal-header">
+        <span>📦 बॉडी विकल्प चुनें</span>
+        <span class="modal-close" onclick="closeBodySelectModal()">×</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+        <button class="select-opt-btn" onclick="openBodySubModal('upper')">
+          <span style="font-size: 18px;">🔝</span>
+          <div>
+            <div>अपर बॉडी (Upper Body)</div>
+            <div style="font-size: 11px; color: #777; font-weight: normal;">ऊपर की पट्टी (Author Bar)</div>
+          </div>
+        </button>
+        <button class="select-opt-btn" onclick="openBodySubModal('lower')">
+          <span style="font-size: 18px;">🔘</span>
+          <div>
+            <div>लोअर बॉडी (Lower Body)</div>
+            <div style="font-size: 11px; color: #777; font-weight: normal;">नीचे की पट्टी (Page Header)</div>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1.2 बॉडी सब-मेन्यू मोडल -->
+  <div id="bodySubMenuModal" class="modal" style="background: rgba(0,0,0,0.6);">
+    <div class="modal-box" style="max-width: 340px;">
+      <div class="modal-header">
+        <span id="bodySubMenuTitle">⚙️ विकल्प चुनें</span>
+        <span class="modal-close" onclick="closeBodySubMenuModal()">×</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+        <button class="select-opt-btn" onclick="openIndividualButtonListModal()">
+          <span style="font-size: 18px;">🔘</span>
+          <div>
+            <div>बटन (Buttons)</div>
+            <div style="font-size: 11px; color: #777; font-weight: normal;">सभी एक साथ या अलग-अलग बटन चुनें</div>
+          </div>
+        </button>
+        <button class="select-opt-btn" onclick="openBodyColorPalette('background')">
+          <span style="font-size: 18px;">🎨</span>
+          <div>
+            <div>बैकग्राउंड (Background)</div>
+            <div style="font-size: 11px; color: #777; font-weight: normal;">पट्टी का बैकग्राउंड रंग बदलें</div>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1.2.1 बटनों की सूची मोडल -->
+  <div id="individualButtonListModal" class="modal" style="background: rgba(0,0,0,0.6);">
+    <div class="modal-box" style="max-width: 360px;">
+      <div class="modal-header">
+        <span id="individualButtonListTitle">🔘 बटन चुनें</span>
+        <span class="modal-close" onclick="closeIndividualButtonListModal()">×</span>
+      </div>
+      <div class="modal-list" id="individualButtonsListContainer"></div>
+    </div>
+  </div>
+
+  <!-- 1.2.2 बटन पार्ट मोडल -->
+  <div id="buttonPartModal" class="modal" style="background: rgba(0,0,0,0.6);">
+    <div class="modal-box" style="max-width: 340px;">
+      <div class="modal-header">
+        <span id="buttonPartTitle">🔘 बटन विकल्प</span>
+        <span class="modal-close" onclick="closeButtonPartModal()">×</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+        <button class="select-opt-btn" onclick="openBodyColorPalette('button_text')">
+          <span style="font-size: 18px;">🔤</span>
+          <div>
+            <div id="partTextTitle">टेक्स्ट रंग (Text Color)</div>
+            <div style="font-size: 11px; color: #777; font-weight: normal;">अक्षरों का रंग बदलें</div>
+          </div>
+        </button>
+        <button class="select-opt-btn" onclick="openBodyColorPalette('button_bg')">
+          <span style="font-size: 18px;">🔲</span>
+          <div>
+            <div id="partBgTitle">बैकग्राउंड रंग (Background Color)</div>
+            <div style="font-size: 11px; color: #777; font-weight: normal;">बटन का बैकग्राउंड रंग बदलें</div>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1.3 बॉडी रंग पैनल मोडल -->
+  <div id="bodyColorPickerModal" class="modal" style="background: rgba(0,0,0,0.6);">
+    <div class="modal-box" style="max-width: 360px;">
+      <div class="modal-header">
+        <span id="bodyColorModalTitle">🎨 रंग चुनें</span>
+        <span class="modal-close" onclick="closeBodyColorPickerModal()">×</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+          <button onclick="applyChosenBodyColor('#ffffff')" style="background:#ffffff; height:34px; border:2px solid #ccc; border-radius:6px; cursor:pointer; color:#111; font-size:11px; font-weight:bold;">सफेद</button>
+          <button onclick="applyChosenBodyColor('#000000')" style="background:#000000; height:34px; border:2px solid #ccc; border-radius:6px; cursor:pointer; color:#fff; font-size:11px; font-weight:bold;">काला</button>
+          <button onclick="applyChosenBodyColor('#1c2b3d')" style="background:#1c2b3d; height:34px; border:2px solid #ccc; border-radius:6px; cursor:pointer; color:#fff; font-size:11px; font-weight:bold;">डार्क नेवी</button>
+          <button onclick="applyChosenBodyColor('#2b5c8f')" style="background:#2b5c8f; height:34px; border:2px solid #ccc; border-radius:6px; cursor:pointer; color:#fff; font-size:11px; font-weight:bold;">नीला</button>
+          <button onclick="applyChosenBodyColor('#2e7d32')" style="background:#2e7d32; height:34px; border:2px solid #ccc; border-radius:6px; cursor:pointer; color:#fff; font-size:11px; font-weight:bold;">हरा</button>
+          <button onclick="applyChosenBodyColor('#8b5a2b')" style="background:#8b5a2b; height:34px; border:2px solid #ccc; border-radius:6px; cursor:pointer; color:#fff; font-size:11px; font-weight:bold;">भूरा</button>
+          <button onclick="applyChosenBodyColor('#d8be91')" style="background:#d8be91; height:34px; border:2px solid #ccc; border-radius:6px; cursor:pointer; color:#333; font-size:11px; font-weight:bold;">गोल्डन</button>
+          <button onclick="applyChosenBodyColor('#f4ece1')" style="background:#f4ece1; height:34px; border:2px solid #ccc; border-radius:6px; cursor:pointer; color:#333; font-size:11px; font-weight:bold;">क्रीम</button>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #eee; padding-top: 10px;">
+          <span style="font-size: 13px; font-weight: bold; color: #333;">मनचाहा रंग चुनें:</span>
+          <input type="color" id="customBodyColorPicker" value="#ffffff" style="width: 45px; height: 32px; border: none; cursor: pointer; background: none;" onchange="applyChosenBodyColor(this.value)">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1.4 ibis Paint X स्टाइल बैकग्राउंड कलर पैनल मोडल -->
+  <div id="ibisBgModal" class="modal" style="background: rgba(0,0,0,0.65);">
+    <div class="modal-box" style="max-width: 360px;">
+      <div class="modal-header">
+        <span style="font-size: 15px; color:#2b5c8f;">🎨 बैकग्राउंड कलर पिकर (ibis स्टाइल)</span>
+        <span class="modal-close" onclick="closeIbisBgModal()">×</span>
+      </div>
+
+      <div class="ibis-picker-wrap">
+        <canvas id="ibisSatValCanvas" class="ibis-sat-val-canvas" width="300" height="150"></canvas>
+        <input type="range" id="ibisHueSlider" class="ibis-hue-slider" min="0" max="360" value="35">
+
+        <div class="ibis-color-info-row">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div id="ibisCurrentPreview" class="ibis-preview-box" style="background:#f4ece1;"></div>
+            <div>
+              <div style="font-size:11px; color:#777;">HEX CODE</div>
+              <div id="ibisHexLabel" style="font-weight:bold; font-size:14px; color:#222;">#F4ECE1</div>
+            </div>
+          </div>
+          <button onclick="confirmIbisBgColor()" style="background:#2e7d32; color:#fff; border:none; padding:8px 14px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:13px;">लागू करें</button>
+        </div>
+
+        <div style="display:flex; gap:5px; justify-content:space-between; margin-top:2px;">
+          <span class="modal-color-dot" style="background:#f4ece1; border:2.5px solid #2b5c8f;" onclick="setIbisDirectColor('#f4ece1')" title="हेडर क्रीम (ओरिजिनल)"></span>
+          <span class="modal-color-dot" style="background:#fffdf9; border-color:#ccc;" onclick="setIbisDirectColor('#fffdf9')" title="क्लासिक क्रीम"></span>
+          <span class="modal-color-dot" style="background:#fff9c4; border-color:#ccc;" onclick="setIbisDirectColor('#fff9c4')" title="हल्का पीला"></span>
+          <span class="modal-color-dot" style="background:#e3f2fd; border-color:#ccc;" onclick="setIbisDirectColor('#e3f2fd')" title="हल्का नीला"></span>
+          <span class="modal-color-dot" style="background:#e8f5e9; border-color:#ccc;" onclick="setIbisDirectColor('#e8f5e9')" title="हल्का हरा"></span>
+          <span class="modal-color-dot" style="background:#efebe9; border-color:#ccc;" onclick="setIbisDirectColor('#efebe9')" title="हल्का भूरा"></span>
+          <span class="modal-color-dot" style="background:#1e1e1e; border-color:#666;" onclick="setIbisDirectColor('#1e1e1e')" title="डार्क ग्रे"></span>
+        </div>
+
+        <div class="ibis-scope-badge">
+          <button id="scopeSingleBtn" class="ibis-scope-btn active" onclick="setIbisScope('single')">📄 केवल यह पेज</button>
+          <button id="scopeAllBtn" class="ibis-scope-btn" onclick="setIbisScope('all')">📚 पूरी किताब (सभी पेज)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. टेक्स्ट सिलेक्शन विधि विंडो -->
+  <div id="textSelectModeModal" class="modal" style="background: rgba(0,0,0,0.6);">
+    <div class="modal-box" style="max-width: 340px;">
+      <div class="modal-header">
+        <span>📄 टेक्स्ट कैसे सेलेक्ट करना है?</span>
+        <span class="modal-close" onclick="closeTextSelectModeModal()">×</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+        <button class="select-opt-btn" onclick="openTextHierarchyModal()">
+          <span style="font-size: 18px;">📊</span>
+          <div>
+            <div>1. बड़े से छोटा क्रम</div>
+            <div style="font-size: 11px; color: #777; font-weight: normal;">साइज और बोल्ड के क्रम अनुसार चुनें</div>
+          </div>
+        </button>
+        <button class="select-opt-btn" onclick="closeTextSelectModeModal()">
+          <span style="font-size: 18px;">👆</span>
+          <div>
+            <div>2. डायरेक्ट उंगली से सेलेक्ट करें</div>
+            <div style="font-size: 11px; color: #777; font-weight: normal;">पहली लाइन पर बटन ऊपर, बाकी पर नीचे दिखेगा</div>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. टेक्स्ट हाइरार्की मोडल विंडो -->
+  <div id="textHierarchyModal" class="modal" style="background: rgba(0,0,0,0.6);">
+    <div class="modal-box" style="max-width: 390px;">
+      <div class="modal-header">
+        <span style="font-size: 15px;">📊 बड़े से छोटा क्रम (साइज सूची)</span>
+        <span class="modal-close" onclick="closeTextHierarchyModal()">×</span>
+      </div>
+      <div style="font-size: 11px; color: #777; margin-top: 6px;">(बड़े टेक्स्ट से छोटे टेक्स्ट के क्रम में, बराबर होने पर बोल्ड पहले)</div>
+      <div class="modal-list" id="textHierarchyList"></div>
+    </div>
+  </div>
+
+  <!-- 4.1 टेक्स्ट शैडो स्टाइल सेलेक्टर मोडल -->
+  <div id="shadowStylesModal" class="modal bottom-align" style="background: rgba(0,0,0,0.4);">
+    <div class="modal-box" style="max-width: 380px;">
+      <div class="modal-header">
+        <span style="font-size: 15px; color:#2b5c8f;">✨ शैडो व शेडिंग स्टाइल चुनें</span>
+        <span class="modal-close" onclick="closeShadowStylesModal()">×</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+        
+        <button class="select-opt-btn" onclick="applyShadowStyle(1)" style="border-left: 4px solid #2b5c8f; background:#f0f7ff; padding:10px 14px;">
+          <span style="font-size: 18px;">🔤</span>
+          <div>
+            <div style="font-weight:bold; color:#1a446c;">1. लेटर-बाय-लेटर शैडो</div>
+            <div style="font-size: 11px; color: #666;">अक्षर के पीछे कोमल छाया</div>
+          </div>
+        </button>
+
+        <button class="select-opt-btn" onclick="applyShadowStyle(2)" style="padding:10px 14px;">
+          <span style="font-size: 18px;">🖍️</span>
+          <div>
+            <div style="font-weight:bold;">2. हाफ मार्कर शेड (50%)</div>
+            <div style="font-size: 11px; color: #777;">अक्षरों के निचले आधे हिस्से पर शेडिंग</div>
+          </div>
+        </button>
+
+        <button class="select-opt-btn" onclick="applyShadowStyle(3)" style="padding:10px 14px;">
+          <span style="font-size: 18px;">🔲</span>
+          <div>
+            <div style="font-weight:bold;">3. फुल स्ट्रिप ब्लॉक (Soft Block)</div>
+            <div style="font-size: 11px; color: #777;">पूरी पंक्ति पर हल्का शेड ब्लॉक</div>
+          </div>
+        </button>
+
+        <button class="select-opt-btn" onclick="applyShadowStyle(4)" style="padding:10px 14px;">
+          <span style="font-size: 18px;">═</span>
+          <div>
+            <div style="font-weight:bold;">4. डबल बॉर्डर शेड (Double Line)</div>
+            <div style="font-size: 11px; color: #777;">ऊपर और नीचे हल्की परिरेखा शेडिंग</div>
+          </div>
+        </button>
+
+        <button class="select-opt-btn" onclick="applyShadowStyle(0)" style="background:#fff0f0; border-color:#ef9a9a; color:#c62828; padding:10px 14px;">
+          <span style="font-size: 18px;">🧹</span>
+          <div>
+            <div style="font-weight:bold;">सादा करें (Remove Shadow)</div>
+            <div style="font-size: 11px; color: #888;">सभी प्रकार की शेडिंग हटाएं</div>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. टेक्स्ट फॉर्मेटिंग कंट्रोल विंडो -->
+  <div id="textFormatModal" class="modal bottom-align" style="background: rgba(0,0,0,0.3);">
+    <div class="modal-box" style="max-width: 380px; gap: 8px; padding: 12px;">
+      <div class="modal-header" style="padding-bottom: 6px;">
+        <span style="font-size: 14.5px; color:#2b5c8f;">✏️ टेक्स्ट फॉर्मेटिंग टूल्स</span>
+        <span class="modal-close" onclick="closeTextFormatModal()">×</span>
+      </div>
+
+      <div class="fmt-group-row">
+        <button class="modal-fmt-btn" onclick="applyTargetBold()" title="बोल्ड / अनबोल्ड"><b>B</b></button>
+        <button class="modal-fmt-btn" id="modalUBtn" onpointerdown="handleUPointerDown(event)" onpointerup="handleUPointerUp(event)" onpointerleave="handleUPointerCancel(event)" title="अंडरलाइन (दबाए रखें: रंग मोड)"><u>U</u></button>
+        <button class="modal-fmt-btn" onclick="openShadowStylesModal()" title="शैडो व शेडिंग स्टाइल चुनें">✨ शैडो</button>
+        <button class="modal-fmt-btn" onclick="applyTargetFontSizeDelta(2)" title="टेक्स्ट बड़ा करें">A+</button>
+        <button class="modal-fmt-btn" onclick="applyTargetFontSizeDelta(-2)" title="टेक्स्ट छोटा करें">A-</button>
+      </div>
+
+      <div class="fmt-group-row">
+        <button class="modal-fmt-btn" onclick="applyTargetHeading('H1')" style="color:#b22222;">H1</button>
+        <button class="modal-fmt-btn" onclick="applyTargetHeading('H2')" style="color:#1b4d89;">H2</button>
+        <button class="modal-fmt-btn" onclick="applyTargetHeading('H3')" style="color:#2e7d32;">H3</button>
+        <button class="modal-fmt-btn" onclick="applyTargetHeading('P')" style="font-size:12px; color:#555;">Normal</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 4px; border-top: 1px solid #eee; padding-top: 6px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span id="colorPickerLabel" style="font-size: 11.5px; font-weight: bold; color: #555;">🎨 टेक्स्ट रंग चुनें:</span>
+          <div style="display: flex; gap: 4px;">
+            <button id="modeTextColBtn" onclick="setPickerMode('text')" style="font-size:10.5px; padding:2px 6px; background:#2b5c8f; color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">टेक्स्ट रंग</button>
+            <button id="modeShadowColBtn" onclick="setPickerMode('shadow')" style="font-size:10.5px; padding:2px 6px; background:#ddd; color:#333; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">शैडो रंग</button>
+          </div>
+        </div>
+        <div style="display: flex; gap: 3px; justify-content: space-between; align-items: center;">
+          <span class="modal-color-dot" style="background:#000000;" onclick="handleModalColorSelection('#000000')" title="काला"></span>
+          <span class="modal-color-dot" style="background:#b22222;" onclick="handleModalColorSelection('#b22222')" title="लाल"></span>
+          <span class="modal-color-dot" style="background:#1b4d89;" onclick="handleModalColorSelection('#1b4d89')" title="नीला"></span>
+          <span class="modal-color-dot" style="background:#2e7d32;" onclick="handleModalColorSelection('#2e7d32')" title="हरा"></span>
+          <span class="modal-color-dot" style="background:#8b5a2b;" onclick="handleModalColorSelection('#8b5a2b')" title="भूरा"></span>
+          <span class="modal-color-dot" style="background:#d81b60;" onclick="handleModalColorSelection('#d81b60')" title="गुलाबी"></span>
+          <span class="modal-color-dot" style="background:#6a1b9a;" onclick="handleModalColorSelection('#6a1b9a')" title="बैंगनी"></span>
+          <span class="modal-color-dot" style="background:#e65100;" onclick="handleModalColorSelection('#e65100')" title="नारंगी"></span>
+          <input type="color" id="paletteColorInput" onchange="handleModalColorSelection(this.value)" style="width:28px; height:28px; border:none; border-radius:50%; cursor:pointer; background:none;" title="मनचाहा रंग">
+        </div>
+      </div>
+
+      <button onclick="closeTextFormatModal()" style="margin-top: 2px; background: #2b5c8f; color: white; border: none; padding: 8px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13.5px;">✔️ ठीक है</button>
+    </div>
+  </div>
+
+  <div id="noteColorModal" class="modal" style="background: rgba(0,0,0,0.6);">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span>📌 नोट बॉक्स का रंग चुनें</span>
+        <span class="modal-close" onclick="closeNoteColorModal()">×</span>
+      </div>
+      <div class="modal-list" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px;">
+        <button onclick="insertNoteBoxWithColor('#fffbf0', '#d9cbaf', '#7f4f14')" style="background:#fffbf0; border:2px solid #d9cbaf; padding:12px; border-radius:8px; cursor:pointer; font-weight:bold; color:#7f4f14;">क्लासिक</button>
+        <button onclick="insertNoteBoxWithColor('#ffebee', '#ef9a9a', '#c62828')" style="background:#ffebee; border:2px solid #ef9a9a; padding:12px; border-radius:8px; cursor:pointer; font-weight:bold; color:#c62828;">हल्का लाल</button>
+        <button onclick="insertNoteBoxWithColor('#e3f2fd', '#90caf9', '#1565c0')" style="background:#e3f2fd; border:2px solid #90caf9; padding:12px; border-radius:8px; cursor:pointer; font-weight:bold; color:#1565c0;">हल्का नीला</button>
+        <button onclick="insertNoteBoxWithColor('#e8f5e9', '#a5d6a7', '#2e7d32')" style="background:#e8f5e9; border:2px solid #a5d6a7; padding:12px; border-radius:8px; cursor:pointer; font-weight:bold; color:#2e7d32;">हल्का हरा</button>
+        <button onclick="insertNoteBoxWithColor('#efebe9', '#d7ccc8', '#4e342e')" style="background:#efebe9; border:2px solid #d7ccc8; padding:12px; border-radius:8px; cursor:pointer; font-weight:bold; color:#4e342e;">हल्का भूरा</button>
+        <button onclick="insertNoteBoxWithColor('#fce4ec', '#f48fb1', '#ad1457')" style="background:#fce4ec; border:2px solid #f48fb1; padding:12px; border-radius:8px; cursor:pointer; font-weight:bold; color:#ad1457;">गुलाबी</button>
+        <button onclick="insertNoteBoxWithColor('#f3e5f5', '#ce93d8', '#6a1b9a')" style="background:#f3e5f5; border:2px solid #ce93d8; padding:12px; border-radius:8px; cursor:pointer; font-weight:bold; color:#6a1b9a;">बैंगनी</button>
+        <button onclick="insertNoteBoxWithColor('#fff3e0', '#ffb74d', '#e65100')" style="background:#fff3e0; border:2px solid #ffb74d; padding:12px; border-radius:8px; cursor:pointer; font-weight:bold; color:#e65100;">नारंगी</button>
+        <button onclick="insertNoteBoxWithColor('#e0f7fa', '#80deea', '#006064')" style="background:#e0f7fa; border:2px solid #80deea; padding:12px; border-radius:8px; cursor:pointer; font-weight:bold; color:#006064;">आसमानी</button>
+      </div>
+      <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 12px; display: flex; align-items: center; justify-content: space-between;">
+        <span style="font-size: 13px; font-weight: bold; color: #333;">मनचाहा रंग (कलर व्हील):</span>
+        <input type="color" id="customNoteColorPicker" value="#fffbf0" style="width: 45px; height: 32px; border: none; cursor: pointer; background: none;" onchange="applyCustomNoteColor(this.value)">
+      </div>
+    </div>
+  </div>
+
+  <div id="mapModal" class="modal" onclick="closeMapModal()">
+    <span class="close-btn" onclick="closeMapModal()">×</span>
+    <img id="modalImg" class="modal-content" src="">
+  </div>
+
+  <div id="indexModal" class="modal" style="background: rgba(0,0,0,0.6);">
+    <div class="modal-box" style="max-width: 480px;">
+      <div class="modal-header">
+        <span>📑 विषय-सूची (ऑटो-इंडेक्स)</span>
+        <span class="modal-close" onclick="closeIndexModal()">×</span>
+      </div>
+      <div class="modal-list" id="indexList"></div>
+    </div>
+  </div>
+
+  <script>
+    const totalPages = 1000;
+    let currentPage = parseInt(localStorage.getItem('history_book_last_page')) || 1;
+    let isLocked = false;
+    let isDarkMode = localStorage.getItem('history_book_dark_mode') === 'true';
+    let currentFontSize = parseInt(localStorage.getItem('history_book_font_size')) || 17;
+    let currentFontType = localStorage.getItem('history_book_font_type') || 'modern';
+    let isSlideEnabled = localStorage.getItem('history_book_slide_enabled') !== 'false';
+    
+    let targetedElement = null;
+    let isUnderlineColorMode = false;
+    let currentActiveColor = '#1b4d89';
+    let currentShadowColor = '#ffb74d';
+    let currentActiveShadowStyle = 0;
+    let pickerColorMode = 'text';
+    
+    let selectedBodySection = 'upper';
+    let selectedBodyTargetType = 'background';
+    let selectedIndividualButtonId = 'all'; 
+    let selectedIndividualButtonName = 'सभी बटन एक साथ';
+
+    let ibisHue = 35;
+    let ibisSat = 0.07;
+    let ibisVal = 0.96;
+    let ibisSelectedHex = '#F4ECE1';
+    let ibisScope = 'single';
+
+    let undoStack = [];
+    let redoStack = [];
+    let isUndoRedoActive = false;
+
+    const pageText = document.getElementById('pageText');
+    const underPage = document.getElementById('underPage');
+    const pageLabel = document.getElementById('pageLabel');
+    const jumpInput = document.getElementById('jumpInput');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const authorBar = document.getElementById('authorBar');
+    const pageHeader = document.getElementById('pageHeader');
+    const navControls = document.getElementById('navControls');
+    const lockToggleBtn = document.getElementById('lockToggleBtn');
+    const bookStage = document.getElementById('bookStage');
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const wordCountLabel = document.getElementById('wordCountLabel');
+    const slideToggleBtn = document.getElementById('slideToggleBtn');
+    const floatingFormatBtn = document.getElementById('floatingFormatBtn');
+
+    // नोट बॉक्स के अंदर पेस्ट करते समय टेक्स्ट को बाहर जाने से रोकने वाला फिल्टर
+    document.addEventListener('paste', function (e) {
+      const activeEl = document.activeElement;
+      if (activeEl && activeEl.classList.contains('history-note')) {
+        e.preventDefault();
+        let text = (e.originalEvent || e).clipboardData.getData('text/plain');
+        
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+        selection.deleteFromDocument();
+        
+        const range = selection.getRangeAt(0);
+        const textNode = document.createTextNode(text);
+        range.insertNode(textNode);
+        
+        range.setStartAfter(textNode);
+        range.setEndAfter(textNode);
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        saveCurrentPage();
+        updateWordCount();
+      }
+    });
+
+    function clearTargetHighlight() {
+      if (targetedElement) {
+        try { targetedElement.classList.remove('custom-active-target'); } catch (e) {}
+        targetedElement = null;
+      }
+    }
+
+    function openSelectModal() {
+      document.getElementById('selectModal').style.display = 'flex';
+    }
+
+    function closeSelectModal() {
+      document.getElementById('selectModal').style.display = 'none';
+    }
+
+    function closeBodySelectModal() {
+      document.getElementById('bodySelectModal').style.display = 'none';
+    }
+
+    function openBodySubModal(section) {
+      selectedBodySection = section;
+      closeBodySelectModal();
+      const title = document.getElementById('bodySubMenuTitle');
+      title.innerText = (section === 'upper') ? '🔝 अपर बॉडी (Author Bar)' : '🔘 लोअर बॉडी (Page Header)';
+      document.getElementById('bodySubMenuModal').style.display = 'flex';
+    }
+
+    function closeBodySubMenuModal() {
+      document.getElementById('bodySubMenuModal').style.display = 'none';
+    }
+
+    function openIndividualButtonListModal() {
+      closeBodySubMenuModal();
+      const container = document.getElementById('individualButtonsListContainer');
+      container.innerHTML = '';
+      
+      const title = document.getElementById('individualButtonListTitle');
+      const sectionName = (selectedBodySection === 'upper') ? 'अपर बॉडी' : 'लोअर बॉडी';
+      title.innerText = `🔘 ${sectionName} - बटन चुनें`;
+
+      let buttons = [];
+      if (selectedBodySection === 'upper') {
+        buttons = [
+          { id: 'all', name: '🌟 सभी बटन एक साथ (All Buttons)' },
+          { id: 'btn_note', name: '📌 नोट (Note)' },
+          { id: 'btn_photo', name: '🖼️ फोटो (Photo)' },
+          { id: 'btn_video', name: '▶️ वीडियो (Video)' },
+          { id: 'btn_map', name: '🗺️ मानचित्र (Map)' },
+          { id: 'btn_clear', name: '🧹 साफ़ करें (Clear)' },
+          { id: 'btn_publish', name: '📤 पब्लिश (Publish)' }
+        ];
+      } else {
+        buttons = [
+          { id: 'all', name: '🌟 सभी बटन एक साथ (All Buttons)' },
+          { id: 'btn_select', name: '🎯 सेलेक्ट (Select)' },
+          { id: 'btn_slide', name: '↔️ स्लाइड (Slide)' },
+          { id: 'btn_index', name: '📑 सूची (Index)' },
+          { id: 'fontSelector', name: '🔤 फॉन्ट सेलेक्टर (Font)' },
+          { id: 'btn_undo', name: '↶ Undo' },
+          { id: 'btn_redo', name: '↷ Redo' },
+          { id: 'themeToggleBtn', name: '🌙 थीम बटन (Theme)' },
+          { id: 'lockToggleBtn', name: '🔒 लॉक बटन (Lock)' }
+        ];
+      }
+
+      buttons.forEach((btn, idx) => {
+        const itemBtn = document.createElement('button');
+        itemBtn.className = 'select-opt-btn';
+        if (idx === 0) {
+          itemBtn.style.background = '#eef5fc';
+          itemBtn.style.borderColor = '#2b5c8f';
+        }
+        itemBtn.innerHTML = `<span>${btn.name}</span>`;
+        itemBtn.onclick = () => {
+          selectedIndividualButtonId = btn.id;
+          selectedIndividualButtonName = btn.name;
+          closeIndividualButtonListModal();
+          openButtonPartModal();
+        };
+        container.appendChild(itemBtn);
+      });
+
+      document.getElementById('individualButtonListModal').style.display = 'flex';
+    }
+
+    function closeIndividualButtonListModal() {
+      document.getElementById('individualButtonListModal').style.display = 'none';
+    }
+
+    function openButtonPartModal() {
+      const title = document.getElementById('buttonPartTitle');
+      title.innerText = `${selectedIndividualButtonName}`;
+      
+      const partTextTitle = document.getElementById('partTextTitle');
+      const partBgTitle = document.getElementById('partBgTitle');
+
+      if (selectedIndividualButtonId === 'all') {
+        partTextTitle.innerText = 'सभी बटन टेक्स्ट रंग (All Text Color)';
+        partBgTitle.innerText = 'सभी बटन बैकग्राउंड रंग (All Button Background)';
+      } else {
+        partTextTitle.innerText = 'टेक्स्ट रंग (Text Color)';
+        partBgTitle.innerText = 'बैकग्राउंड रंग (Background Color)';
+      }
+
+      document.getElementById('buttonPartModal').style.display = 'flex';
+    }
+
+    function closeButtonPartModal() {
+      document.getElementById('buttonPartModal').style.display = 'none';
+    }
+
+    function openBodyColorPalette(type) {
+      selectedBodyTargetType = type;
+      closeBodySubMenuModal();
+      closeButtonPartModal();
+      
+      const title = document.getElementById('bodyColorModalTitle');
+      const sectionName = (selectedBodySection === 'upper') ? 'अपर बॉडी' : 'लोअर बॉडी';
+      
+      let targetName = 'बैकग्राउंड';
+      if (type === 'button_bg') targetName = `${selectedIndividualButtonName} (Background)`;
+      else if (type === 'button_text') targetName = `${selectedIndividualButtonName} (Text Color)`;
+      
+      title.innerText = `🎨 ${targetName}`;
+      document.getElementById('bodyColorPickerModal').style.display = 'flex';
+    }
+
+    function closeBodyColorPickerModal() {
+      document.getElementById('bodyColorPickerModal').style.display = 'none';
+    }
+
+    function applyChosenBodyColor(colorHex) {
+      if (selectedBodySection === 'upper') {
+        if (selectedBodyTargetType === 'background') {
+          authorBar.style.backgroundColor = colorHex;
+          localStorage.setItem('history_book_upper_bg', colorHex);
+        } else if (selectedBodyTargetType === 'button_bg') {
+          if (selectedIndividualButtonId === 'all') {
+            const upperBtns = authorBar.querySelectorAll('.tool-btn, .publish-btn');
+            upperBtns.forEach(b => { 
+              b.style.setProperty('background-color', colorHex, 'important'); 
+              localStorage.setItem('history_book_btn_bg_' + b.id, colorHex);
+            });
+          } else {
+            const el = document.getElementById(selectedIndividualButtonId);
+            if (el) {
+              el.style.setProperty('background-color', colorHex, 'important');
+              localStorage.setItem('history_book_btn_bg_' + selectedIndividualButtonId, colorHex);
+            }
+          }
+        } else if (selectedBodyTargetType === 'button_text') {
+          if (selectedIndividualButtonId === 'all') {
+            const upperBtns = authorBar.querySelectorAll('.tool-btn, .publish-btn');
+            upperBtns.forEach(b => { 
+              b.style.setProperty('color', colorHex, 'important'); 
+              localStorage.setItem('history_book_btn_text_' + b.id, colorHex);
+            });
+          } else {
+            const el = document.getElementById(selectedIndividualButtonId);
+            if (el) {
+              el.style.setProperty('color', colorHex, 'important');
+              localStorage.setItem('history_book_btn_text_' + selectedIndividualButtonId, colorHex);
+            }
+          }
+        }
+      } else if (selectedBodySection === 'lower') {
+        if (selectedBodyTargetType === 'background') {
+          pageHeader.style.backgroundColor = colorHex;
+          localStorage.setItem('history_book_lower_bg', colorHex);
+        } else if (selectedBodyTargetType === 'button_bg') {
+          if (selectedIndividualButtonId === 'all') {
+            const lowerBtns = pageHeader.querySelectorAll('.header-tool-btn, .font-zoom-btn, .header-font-select, .mode-btn');
+            lowerBtns.forEach(b => { 
+              b.style.setProperty('background-color', colorHex, 'important'); 
+              localStorage.setItem('history_book_btn_bg_' + b.id, colorHex);
+            });
+          } else {
+            const el = document.getElementById(selectedIndividualButtonId);
+            if (el) {
+              el.style.setProperty('background-color', colorHex, 'important');
+              localStorage.setItem('history_book_btn_bg_' + selectedIndividualButtonId, colorHex);
+            }
+          }
+        } else if (selectedBodyTargetType === 'button_text') {
+          if (selectedIndividualButtonId === 'all') {
+            const lowerBtns = pageHeader.querySelectorAll('.header-tool-btn, .font-zoom-btn, .header-font-select, .mode-btn');
+            lowerBtns.forEach(b => { 
+              b.style.setProperty('color', colorHex, 'important'); 
+              localStorage.setItem('history_book_btn_text_' + b.id, colorHex);
+            });
+          } else {
+            const el = document.getElementById(selectedIndividualButtonId);
+            if (el) {
+              el.style.setProperty('color', colorHex, 'important');
+              localStorage.setItem('history_book_btn_text_' + selectedIndividualButtonId, colorHex);
+            }
+          }
+        }
+      }
+      closeBodyColorPickerModal();
+    }
+
+    function applySavedBodyColors() {
+      const upperBg = localStorage.getItem('history_book_upper_bg');
+      const lowerBg = localStorage.getItem('history_book_lower_bg');
+
+      if (!isDarkMode) {
+        if (upperBg) authorBar.style.backgroundColor = upperBg;
+        if (lowerBg) pageHeader.style.backgroundColor = lowerBg;
+
+        const allBtnIds = [
+          'btn_note', 'btn_photo', 'btn_video', 'btn_map', 'btn_clear', 'btn_publish',
+          'btn_select', 'btn_slide', 'btn_index', 'fontSelector', 'btn_undo', 'btn_redo', 'themeToggleBtn', 'lockToggleBtn'
+        ];
+
+        allBtnIds.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+            const savedBg = localStorage.getItem('history_book_btn_bg_' + id);
+            const savedText = localStorage.getItem('history_book_btn_text_' + id);
+            if (savedBg) el.style.setProperty('background-color', savedBg, 'important');
+            if (savedText) el.style.setProperty('color', savedText, 'important');
+          }
+        });
+      }
+    }
+
+    function openIbisBgModal() {
+      document.getElementById('ibisBgModal').style.display = 'flex';
+      setTimeout(initIbisCanvas, 60);
+    }
+
+    function closeIbisBgModal() {
+      document.getElementById('ibisBgModal').style.display = 'none';
+    }
+
+    function setIbisScope(scope) {
+      ibisScope = scope;
+      document.getElementById('scopeSingleBtn').classList.toggle('active', scope === 'single');
+      document.getElementById('scopeAllBtn').classList.toggle('active', scope === 'all');
+    }
+
+    function initIbisCanvas() {
+      const canvas = document.getElementById('ibisSatValCanvas');
+      if (!canvas) return;
+      drawIbisCanvas();
+      attachIbisCanvasEvents();
+    }
+
+    function drawIbisCanvas() {
+      const canvas = document.getElementById('ibisSatValCanvas');
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.fillStyle = `hsl(${ibisHue}, 100%, 50%)`;
+      ctx.fillRect(0, 0, w, h);
+
+      const gradWhite = ctx.createLinearGradient(0, 0, w, 0);
+      gradWhite.addColorStop(0, 'rgba(255,255,255,1)');
+      gradWhite.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = gradWhite;
+      ctx.fillRect(0, 0, w, h);
+
+      const gradBlack = ctx.createLinearGradient(0, 0, 0, h);
+      gradBlack.addColorStop(0, 'rgba(0,0,0,0)');
+      gradBlack.addColorStop(1, 'rgba(0,0,0,1)');
+      ctx.fillStyle = gradBlack;
+      ctx.fillRect(0, 0, w, h);
+
+      const cx = ibisSat * w;
+      const cy = (1 - ibisVal) * h;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 6, 0, 2 * Math.PI);
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cx, cy, 7, 0, 2 * Math.PI);
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    function updateIbisFromXY(x, y) {
+      const canvas = document.getElementById('ibisSatValCanvas');
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+
+      let clampedX = Math.max(0, Math.min(x - rect.left, rect.width)) * scaleX;
+      let clampedY = Math.max(0, Math.min(y - rect.top, rect.height)) * scaleY;
+
+      ibisSat = clampedX / canvas.width;
+      ibisVal = 1 - (clampedY / canvas.height);
+
+      updateIbisColorOutput();
+      drawIbisCanvas();
+    }
+
+    function attachIbisCanvasEvents() {
+      const canvas = document.getElementById('ibisSatValCanvas');
+      let isDragging = false;
+
+      function onDown(e) {
+        isDragging = true;
+        const pos = e.touches ? e.touches[0] : e;
+        updateIbisFromXY(pos.clientX, pos.clientY);
+      }
+      function onMove(e) {
+        if (!isDragging) return;
+        const pos = e.touches ? e.touches[0] : e;
+        updateIbisFromXY(pos.clientX, pos.clientY);
+      }
+      function onUp() { isDragging = false; }
+
+      canvas.onpointerdown = (e) => { canvas.setPointerCapture(e.pointerId); onDown(e); };
+      canvas.onpointermove = onMove;
+      canvas.onpointerup = onUp;
+
+      const slider = document.getElementById('ibisHueSlider');
+      slider.oninput = () => {
+        ibisHue = parseFloat(slider.value);
+        updateIbisColorOutput();
+        drawIbisCanvas();
+      };
+    }
+
+    function hsvToRgb(h, s, v) {
+      let r, g, b;
+      let i = Math.floor(h / 60) % 6;
+      let f = h / 60 - Math.floor(h / 60);
+      let p = v * (1 - s);
+      let q = v * (1 - f * s);
+      let t = v * (1 - (1 - f) * s);
+      switch (i) {
+        case 0: r = v; g = t; b = p; break;
+        case 1: r = q; g = v; b = p; break;
+        case 2: r = p; g = v; b = t; break;
+        case 3: r = p; g = q; b = v; break;
+        case 4: r = t; g = p; b = v; break;
+        case 5: r = v; g = p; b = q; break;
+      }
+      return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+    }
+
+    function updateIbisColorOutput() {
+      const rgb = hsvToRgb(ibisHue, ibisSat, ibisVal);
+      const hex = '#' + rgb.map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
+      ibisSelectedHex = hex;
+      document.getElementById('ibisCurrentPreview').style.backgroundColor = hex;
+      document.getElementById('ibisHexLabel').innerText = hex;
+    }
+
+    function setIbisDirectColor(hex) {
+      ibisSelectedHex = hex.toUpperCase();
+      document.getElementById('ibisCurrentPreview').style.backgroundColor = hex;
+      document.getElementById('ibisHexLabel').innerText = hex.toUpperCase();
+    }
+
+    function confirmIbisBgColor() {
+      if (ibisScope === 'single') {
+        if (!isDarkMode) pageText.style.backgroundColor = ibisSelectedHex;
+        localStorage.setItem('history_book_bgcolor_page_' + currentPage, ibisSelectedHex);
+      } else {
+        for (let i = 1; i <= totalPages; i++) {
+          localStorage.setItem('history_book_bgcolor_page_' + i, ibisSelectedHex);
+        }
+        if (!isDarkMode) pageText.style.backgroundColor = ibisSelectedHex;
+      }
+      closeIbisBgModal();
+    }
+
+    function closeTextSelectModeModal() {
+      document.getElementById('textSelectModeModal').style.display = 'none';
+    }
+
+    function closeTextHierarchyModal() {
+      document.getElementById('textHierarchyModal').style.display = 'none';
+    }
+
+    function openShadowStylesModal() {
+      document.getElementById('shadowStylesModal').style.display = 'flex';
+    }
+
+    function closeShadowStylesModal() {
+      document.getElementById('shadowStylesModal').style.display = 'none';
+    }
+
+    function openTextFormatModal() {
+      if (!targetedElement) return;
+      resetUnderlineColorMode();
+      setPickerMode('text');
+      document.getElementById('textFormatModal').style.display = 'flex';
+    }
+
+    function closeTextFormatModal() {
+      document.getElementById('textFormatModal').style.display = 'none';
+      resetUnderlineColorMode();
+      clearTargetHighlight();
+    }
+
+    function setPickerMode(mode) {
+      pickerColorMode = mode;
+      const label = document.getElementById('colorPickerLabel');
+      const btnText = document.getElementById('modeTextColBtn');
+      const btnShadow = document.getElementById('modeShadowColBtn');
+
+      if (mode === 'text') {
+        label.innerText = '🎨 टेक्स्ट रंग चुनें:';
+        btnText.style.background = '#2b5c8f';
+        btnText.style.color = '#fff';
+        btnShadow.style.background = '#ddd';
+        btnShadow.style.color = '#333';
+      } else {
+        label.innerText = '✨ शैडो / शेडिंग रंग चुनें:';
+        btnShadow.style.background = '#2b5c8f';
+        btnShadow.style.color = '#fff';
+        btnText.style.background = '#ddd';
+        btnText.style.color = '#333';
+      }
+    }
+
+    function resetUnderlineColorMode() {
+      isUnderlineColorMode = false;
+      const uBtn = document.getElementById('modalUBtn');
+      if (uBtn) {
+        uBtn.classList.remove('u-hold-active');
+        uBtn.innerHTML = '<u>U</u>';
+      }
+    }
+
+    function handleSelectAction(type) {
+      closeSelectModal();
+      if (type === 'text') {
+        document.getElementById('textSelectModeModal').style.display = 'flex';
+      } else if (type === 'body') {
+        clearTargetHighlight();
+        document.getElementById('bodySelectModal').style.display = 'flex';
+      } else if (type === 'background') {
+        clearTargetHighlight();
+        openIbisBgModal();
+      }
+    }
+
+    function openTextHierarchyModal() {
+      closeTextSelectModeModal();
+      const list = document.getElementById('textHierarchyList');
+      list.innerHTML = '';
+
+      let textItems = [];
+
+      function isElementBold(el) {
+        if (!el || el === pageText) return false;
+        const tagName = el.tagName ? el.tagName.toUpperCase() : '';
+        if (tagName === 'B' || tagName === 'STRONG' || tagName === 'H1' || tagName === 'H2' || tagName === 'H3') return true;
+        const style = window.getComputedStyle(el);
+        const weight = style.fontWeight;
+        return weight === 'bold' || weight === 'bolder' || parseInt(weight) >= 600;
+      }
+
+      function getElementFontSize(el) {
+        if (!el) return 17;
+        const computed = window.getComputedStyle(el).fontSize;
+        return parseFloat(computed) || 17;
+      }
+
+      const childNodes = Array.from(pageText.childNodes);
+      childNodes.forEach((node) => {
+        if (node.nodeType === Node.TEXT_NODE && node.textContent.trim().length > 0) {
+          const span = document.createElement('span');
+          span.textContent = node.textContent;
+          pageText.replaceChild(span, node);
+        }
+      });
+
+      const elements = pageText.querySelectorAll('h1, h2, h3, p, span, div.history-note');
+      
+      elements.forEach(el => {
+        if (el === pageText || el.closest('.history-image-card') || el.closest('.video-card-wrapper') || el.classList.contains('delete-item-btn')) return;
+        
+        let textContent = el.innerText ? el.innerText.trim() : '';
+        if (textContent.length > 0) {
+          const fSize = getElementFontSize(el);
+          const isBold = isElementBold(el);
+          
+          textItems.push({
+            element: el,
+            text: textContent,
+            fontSize: fSize,
+            isBold: isBold
+          });
+        }
+      });
+
+      if (textItems.length === 0) {
+        list.innerHTML = '<p style="text-align:center; color:#888; padding:20px 0;">इस पेज पर कोई टेक्स्ट नहीं मिला।</p>';
+        document.getElementById('textHierarchyModal').style.display = 'flex';
+        return;
+      }
+
+      textItems.sort((a, b) => {
+        if (b.fontSize !== a.fontSize) {
+          return b.fontSize - a.fontSize;
+        }
+        if (a.isBold !== b.isBold) {
+          return a.isBold ? -1 : 1;
+        }
+        return 0;
+      });
+
+      textItems.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'text-hierarchy-item';
+        
+        let preview = item.text.length > 50 ? item.text.substring(0, 50) + '...' : item.text;
+        let boldBadge = item.isBold ? '<span style="background:#c0392b; color:#fff; font-size:10px; padding:1px 5px; border-radius:4px;">बोल्ड (B)</span>' : '';
+        let sizeBadge = `<span style="background:#2b5c8f; color:#fff; font-size:10px; padding:1px 5px; border-radius:4px;">${Math.round(item.fontSize)}px</span>`;
+
+        let rankTitle = `स्तर ${index + 1}: ${item.isBold ? 'बोल्ड टेक्स्ट' : 'सामान्य टेक्स्ट'}`;
+        if (index === 0) rankTitle = `👑 स्तर 1 (सबसे बड़ा)`;
+        else if (index === 1) rankTitle = `🥈 स्तर 2`;
+        else if (index === 2) rankTitle = `🥉 स्तर 3`;
+
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:bold; font-size:12px; color:#2b5c8f;">${rankTitle}</span>
+            <div style="display:flex; gap:4px; align-items:center;">${boldBadge} ${sizeBadge}</div>
+          </div>
+          <div style="font-size:13px; color:#333; line-height:1.4; margin-top:3px; ${item.isBold ? 'font-weight:bold;' : ''}">${preview}</div>
+        `;
+
+        div.onclick = () => {
+          selectSpecificElementSilently(item.element);
+          closeTextHierarchyModal();
+          openTextFormatModal();
+        };
+
+        list.appendChild(div);
+      });
+
+      document.getElementById('textHierarchyModal').style.display = 'flex';
+    }
+
+    document.addEventListener('selectionchange', () => {
+      const sel = window.getSelection();
+      if (!sel || sel.isCollapsed || !pageText.contains(sel.anchorNode)) {
+        floatingFormatBtn.style.display = 'none';
+        return;
+      }
+      
+      let range = sel.getRangeAt(0);
+      let rect = range.getBoundingClientRect();
+      let pageRect = pageText.getBoundingClientRect();
+      
+      if (rect.width > 0 && rect.height > 0) {
+        floatingFormatBtn.style.display = 'block';
+        floatingFormatBtn.style.left = (rect.left + rect.width / 2) + 'px';
+        
+        let relativeTop = rect.top - pageRect.top;
+        
+        if (relativeTop < 65) {
+          floatingFormatBtn.style.top = (rect.top - 10) + 'px';
+          floatingFormatBtn.style.transform = 'translate(-50%, -100%)';
+        } else {
+          floatingFormatBtn.style.top = (rect.bottom + 8) + 'px';
+          floatingFormatBtn.style.transform = 'translate(-50%, 0)';
+        }
+      } else {
+        floatingFormatBtn.style.display = 'none';
+      }
+    });
+
+    function applyNativeSelectionFormat() {
+      const sel = window.getSelection();
+      if (!sel || sel.isCollapsed || !pageText.contains(sel.anchorNode)) {
+        floatingFormatBtn.style.display = 'none';
+        return;
+      }
+
+      saveStateForUndo();
+      let range = sel.getRangeAt(0);
+      let container = range.commonAncestorContainer;
+      if (container.nodeType === Node.TEXT_NODE) {
+        container = container.parentNode;
+      }
+
+      let targetSpan;
+      if (container && container !== pageText && container.nodeType === Node.ELEMENT_NODE) {
+        targetSpan = container;
+      } else {
+        targetSpan = document.createElement('span');
+        try {
+          range.surroundContents(targetSpan);
+        } catch (err) {
+          let contents = range.extractContents();
+          targetSpan.appendChild(contents);
+          range.insertNode(targetSpan);
+        }
+      }
+
+      floatingFormatBtn.style.display = 'none';
+      saveCurrentPage();
+      updateWordCount();
+
+      selectSpecificElementSilently(targetSpan);
+      openTextFormatModal();
+    }
+
+    function selectSpecificElementSilently(el) {
+      if (!el) return;
+      clearTargetHighlight();
+      window.getSelection().removeAllRanges();
+
+      targetedElement = el;
+      targetedElement.classList.add('custom-active-target');
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function applyTargetBold() {
+      if (!targetedElement || !pageText.contains(targetedElement) || targetedElement === pageText) return;
+      saveStateForUndo();
+      const currentWeight = window.getComputedStyle(targetedElement).fontWeight;
+      if (currentWeight === 'bold' || currentWeight === 'bolder' || parseInt(currentWeight) >= 600 || targetedElement.tagName === 'B' || targetedElement.tagName === 'STRONG') {
+        targetedElement.style.fontWeight = 'normal';
+      } else {
+        targetedElement.style.fontWeight = 'bold';
+      }
+      saveCurrentPage();
+      updateWordCount();
+    }
+
+    function applyShadowStyle(styleIndex) {
+      if (!targetedElement || !pageText.contains(targetedElement) || targetedElement === pageText) return;
+      saveStateForUndo();
+      currentActiveShadowStyle = styleIndex;
+
+      targetedElement.style.backgroundImage = 'none';
+      targetedElement.style.textShadow = 'none';
+      targetedElement.style.backgroundColor = 'transparent';
+      targetedElement.style.padding = '';
+      targetedElement.style.borderRadius = '';
+      targetedElement.style.borderTop = '';
+      targetedElement.style.borderBottom = '';
+
+      const rgbaSubtle = hexToRgba(currentShadowColor, 0.12);
+      const rgbaLine = hexToRgba(currentShadowColor, 0.2);
+      const rgbaLetterGlow = hexToRgba(currentShadowColor, 0.6);
+
+      if (styleIndex === 1) {
+        targetedElement.style.textShadow = `1.5px 2px 3px ${rgbaLetterGlow}`;
+      } else if (styleIndex === 2) {
+        targetedElement.style.backgroundImage = `linear-gradient(to top, ${rgbaSubtle} 0%, ${rgbaSubtle} 45%, transparent 45%, transparent 100%)`;
+        targetedElement.style.display = 'inline';
+        targetedElement.style.boxDecorationBreak = 'clone';
+        targetedElement.style.webkitBoxDecorationBreak = 'clone';
+      } else if (styleIndex === 3) {
+        targetedElement.style.backgroundColor = rgbaSubtle;
+        targetedElement.style.padding = '1px 3px';
+        targetedElement.style.borderRadius = '3px';
+      } else if (styleIndex === 4) {
+        targetedElement.style.borderTop = `1px solid ${rgbaLine}`;
+        targetedElement.style.borderBottom = `1px solid ${rgbaLine}`;
+        targetedElement.style.padding = '1px 0';
+      }
+
+      closeShadowStylesModal();
+      closeTextFormatModal();
+      saveCurrentPage();
+      updateWordCount();
+    }
+
+    function hexToRgba(hex, alpha) {
+      let r = 0, g = 0, b = 0;
+      if (hex.startsWith('#')) {
+        let cleanHex = hex.replace('#', '');
+        if (cleanHex.length === 3) {
+          cleanHex = cleanHex.split('').map(c => c + c).join('');
+        }
+        r = parseInt(cleanHex.substring(0, 2), 16) || 0;
+        g = parseInt(cleanHex.substring(2, 4), 16) || 0;
+        b = parseInt(cleanHex.substring(4, 6), 16) || 0;
+      }
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    let uPressTimer = null;
+    let isLongPressTriggered = false;
+
+    function handleUPointerDown(e) {
+      isLongPressTriggered = false;
+      uPressTimer = setTimeout(() => {
+        isLongPressTriggered = true;
+        toggleUnderlineColorHoldMode();
+      }, 450);
+    }
+
+    function handleUPointerUp(e) {
+      clearTimeout(uPressTimer);
+      if (!isLongPressTriggered) {
+        applyTargetUnderline();
+      }
+    }
+
+    function handleUPointerCancel(e) {
+      clearTimeout(uPressTimer);
+    }
+
+    function toggleUnderlineColorHoldMode() {
+      const uBtn = document.getElementById('modalUBtn');
+      isUnderlineColorMode = !isUnderlineColorMode;
+
+      if (isUnderlineColorMode) {
+        ensureUnderlineApplied();
+        uBtn.classList.add('u-hold-active');
+        uBtn.innerHTML = '<u>U</u> 🎨';
+      } else {
+        resetUnderlineColorMode();
+      }
+    }
+
+    function ensureUnderlineApplied() {
+      if (!targetedElement || !pageText.contains(targetedElement)) return;
+      let hasUnderline = targetedElement.tagName.toUpperCase() === 'U' || (targetedElement.style.textDecoration && targetedElement.style.textDecoration.includes('underline'));
+      if (!hasUnderline) {
+        targetedElement.style.textDecoration = 'underline';
+        targetedElement.style.textDecorationColor = '#2b5c8f';
+      }
+    }
+
+    function applyTargetUnderline() {
+      if (!targetedElement || !pageText.contains(targetedElement) || targetedElement === pageText) return;
+      saveStateForUndo();
+
+      let hasUnderline = false;
+      const computedDecor = window.getComputedStyle(targetedElement).textDecoration;
+      
+      if (targetedElement.tagName.toUpperCase() === 'U' || (computedDecor && computedDecor.includes('underline')) || targetedElement.querySelectorAll('u').length > 0) {
+        hasUnderline = true;
+      }
+
+      if (hasUnderline) {
+        targetedElement.style.textDecoration = 'none';
+        const innerU = targetedElement.querySelectorAll('u');
+        innerU.forEach(uEl => {
+          const parent = uEl.parentNode;
+          while (uEl.firstChild) {
+            parent.insertBefore(uEl.firstChild, uEl);
+          }
+          uEl.remove();
+        });
+
+        if (targetedElement.tagName.toUpperCase() === 'U') {
+          const span = document.createElement('span');
+          span.innerHTML = targetedElement.innerHTML;
+          span.className = targetedElement.className;
+          span.style.cssText = targetedElement.style.cssText;
+          span.style.textDecoration = 'none';
+          targetedElement.parentNode.replaceChild(span, targetedElement);
+          targetedElement = span;
+          targetedElement.classList.add('custom-active-target');
+        }
+        resetUnderlineColorMode();
+      } else {
+        targetedElement.style.textDecoration = 'underline';
+        targetedElement.style.textDecorationColor = '#2b5c8f';
+      }
+
+      saveCurrentPage();
+      updateWordCount();
+    }
+
+    function handleModalColorSelection(colorHex) {
+      if (isUnderlineColorMode) {
+        applyTargetUnderlineColor(colorHex);
+      } else if (pickerColorMode === 'text') {
+        applyTargetTextColor(colorHex);
+      } else {
+        applyTargetShadowColor(colorHex);
+      }
+    }
+
+    function applyTargetUnderlineColor(colorHex) {
+      if (!targetedElement || !pageText.contains(targetedElement)) return;
+      saveStateForUndo();
+      ensureUnderlineApplied();
+      targetedElement.style.textDecorationColor = colorHex;
+      
+      const innerU = targetedElement.querySelectorAll('u');
+      innerU.forEach(uEl => {
+        uEl.style.textDecorationColor = colorHex;
+      });
+
+      saveCurrentPage();
+      updateWordCount();
+    }
+
+    function applyTargetTextColor(colorHex) {
+      if (!targetedElement || !pageText.contains(targetedElement)) return;
+      saveStateForUndo();
+      currentActiveColor = colorHex;
+      targetedElement.style.color = colorHex;
+      
+      saveCurrentPage();
+      updateWordCount();
+    }
+
+    function applyTargetShadowColor(colorHex) {
+      if (!targetedElement || !pageText.contains(targetedElement)) return;
+      saveStateForUndo();
+      currentShadowColor = colorHex;
+      
+      if (currentActiveShadowStyle > 0) {
+        applyShadowStyle(currentActiveShadowStyle);
+      } else {
+        applyShadowStyle(1);
+      }
+    }
+
+    function applyTargetFontSizeDelta(delta) {
+      if (!targetedElement || !pageText.contains(targetedElement)) return;
+      saveStateForUndo();
+      let currentPx = parseFloat(window.getComputedStyle(targetedElement).fontSize) || 17;
+      let newPx = Math.min(Math.max(currentPx + delta, 12), 48);
+      targetedElement.style.fontSize = newPx + 'px';
+      saveCurrentPage();
+      updateWordCount();
+    }
+
+    function applyTargetHeading(tag) {
+      if (!targetedElement || !pageText.contains(targetedElement)) return;
+      saveStateForUndo();
+
+      let targetSize = '17px';
+      let weight = 'normal';
+
+      if (tag === 'H1') {
+        targetSize = '27px';
+        weight = 'bold';
+      } else if (tag === 'H2') {
+        targetSize = '22px';
+        weight = 'bold';
+      } else if (tag === 'H3') {
+        targetSize = '19.5px';
+        weight = 'bold';
+      } else {
+        targetSize = '17px';
+        weight = 'normal';
+      }
+
+      targetedElement.style.display = 'inline';
+      targetedElement.style.fontSize = targetSize;
+      targetedElement.style.fontWeight = weight;
+      targetedElement.style.margin = '0';
+
+      saveCurrentPage();
+      updateWordCount();
+    }
+
+    function toggleSlideMode() {
+      isSlideEnabled = !isSlideEnabled;
+      localStorage.setItem('history_book_slide_enabled', isSlideEnabled);
+      updateSlideButtonState();
+    }
+
+    function updateSlideButtonState() {
+      if (isSlideEnabled) {
+        slideToggleBtn.innerText = '↔️ स्लाइड';
+      } else {
+        slideToggleBtn.innerText = '🔒 स्लाइड';
+      }
+    }
+
+    function openNoteColorModal() {
+      document.getElementById('noteColorModal').style.display = 'flex';
+    }
+    function closeNoteColorModal() {
+      document.getElementById('noteColorModal').style.display = 'none';
+    }
+
+    function insertNoteBoxWithColor(bgColor, borderColor, titleColor) {
+      saveStateForUndo();
+      const noteHtml = `<div class="history-note" contenteditable="true" style="background-color: ${bgColor}; border: 1px solid ${borderColor};"><button class="delete-item-btn" contenteditable="false" onclick="deleteParentItem(this, '.history-note')">✕</button><span class="history-note-title" contenteditable="false" style="color: ${titleColor};">नोट:</span> <span id="cursorTarget"></span></div><p><br></p>`;
+      
+      insertHtmlAtSelection(noteHtml);
+      closeNoteColorModal();
+
+      setTimeout(() => {
+        const target = pageText.querySelector('#cursorTarget');
+        if (target) {
+          const range = document.createRange();
+          const sel = window.getSelection();
+          range.setStartAfter(target);
+          range.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(range);
+          target.remove();
+        }
+      }, 50);
+    }
+
+    function applyCustomNoteColor(hexColor) {
+      insertNoteBoxWithColor(hexColor, '#333333', '#111111');
+    }
+
+    let lastTapTime = 0;
+    bookStage.addEventListener('touchend', (e) => {
+      const sel = window.getSelection();
+      if (sel && !sel.isCollapsed) return;
+
+      const currentTime = new Date().getTime();
+      const tapLength = currentTime - lastTapTime;
+      if (tapLength < 300 && tapLength > 0) {
+        document.body.classList.toggle('immersive-mode');
+        e.preventDefault();
+      }
+      lastTapTime = currentTime;
+    });
+
+    bookStage.addEventListener('dblclick', () => {
+      document.body.classList.toggle('immersive-mode');
+    });
+
+    function applyTheme() {
+      if (isDarkMode) {
+        document.body.classList.add('dark-mode');
+        themeToggleBtn.innerText = '☀️';
+        pageText.style.backgroundColor = '#1e1e1e';
+        authorBar.style.backgroundColor = '#1c2b3d';
+        pageHeader.style.backgroundColor = '#282828';
+      } else {
+        document.body.classList.remove('dark-mode');
+        themeToggleBtn.innerText = '🌙';
+        const savedPageBg = localStorage.getItem('history_book_bgcolor_page_' + currentPage) || '#f4ece1';
+        pageText.style.backgroundColor = savedPageBg;
+        applySavedBodyColors();
+      }
+      localStorage.setItem('history_book_dark_mode', isDarkMode);
+    }
+
+    function toggleDarkMode() {
+      isDarkMode = !isDarkMode;
+      applyTheme();
+    }
+
+    function changeBookFont(type) {
+      currentFontType = type;
+      localStorage.setItem('history_book_font_type', type);
+      
+      let fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+      let fontStyle = "normal";
+
+      if (type === 'modern') {
+        fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+      } else if (type === 'classic') {
+        fontFamily = "'Georgia', serif";
+      } else if (type === 'traditional') {
+        fontFamily = "'Mangal', 'Nirmala UI', serif";
+      } else if (type === 'italic') {
+        fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+        fontStyle = "italic";
+      } else if (type === 'oblique') {
+        fontFamily = "'Georgia', serif";
+        fontStyle = "oblique 15deg";
+      }
+
+      pageText.style.fontFamily = fontFamily;
+      pageText.style.fontStyle = fontStyle;
+      underPage.style.fontFamily = fontFamily;
+      underPage.style.fontStyle = fontStyle;
+
+      const selector = document.getElementById('fontSelector');
+      if (selector) selector.value = type;
+    }
+
+    function updateWordCount() {
+      const text = pageText.innerText || "";
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      wordCountLabel.innerText = `कुल शब्द: ${words}`;
+    }
+
+    function getBookIndex() {
+      let indexList = [];
+      for (let i = 1; i <= totalPages; i++) {
+        let content = localStorage.getItem('history_book_page_' + i) || '';
+        let tempDiv = document.createElement('div');
+        tempDiv.innerHTML = content;
+        let headings = tempDiv.querySelectorAll('h1, h2, h3, b, strong');
+        if (headings.length > 0 && headings[0].innerText.trim()) {
+          indexList.push({ title: headings[0].innerText.trim().substring(0, 30), page: i });
+        }
+      }
+      return indexList;
+    }
+
+    function openIndexModal() {
+      const list = document.getElementById('indexList');
+      list.innerHTML = '';
+      let indexData = getBookIndex();
+      if (indexData.length === 0) {
+        list.innerHTML = '<p style="text-align:center; color:#888; margin-top:20px;">अभी तक कोई शीर्षक नहीं मिला।</p>';
+      } else {
+        indexData.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'modal-list-item';
+          div.innerHTML = `<span>${item.title}</span> <span style="background:#2b5c8f; color:#fff; padding:2px 6px; border-radius:4px; font-size:11px;">पेज ${item.page}</span>`;
+          div.onclick = () => { loadPageInstant(item.page); closeIndexModal(); };
+          list.appendChild(div);
+        });
+      }
+      document.getElementById('indexModal').style.display = 'flex';
+    }
+
+    function closeIndexModal() { document.getElementById('indexModal').style.display = 'none'; }
+
+    function clearCurrentPage() {
+      if (confirm(`क्या आप वाकई पेज ${currentPage} का सारा डेटा साफ़ करना चाहते हैं?`)) {
+        saveStateForUndo();
+        clearTargetHighlight();
+        localStorage.removeItem('history_book_page_' + currentPage);
+        pageText.innerHTML = '';
+        saveCurrentPage();
+        updateWordCount();
+      }
+    }
+
+    function saveStateForUndo() {
+      if (isUndoRedoActive) return;
+      const currentState = pageText.innerHTML;
+      if (undoStack.length === 0 || undoStack[undoStack.length - 1] !== currentState) {
+        undoStack.push(currentState);
+        if (undoStack.length > 30) undoStack.shift();
+        redoStack = [];
+      }
+    }
+
+    function triggerUndo() {
+      if (isLocked || undoStack.length <= 1) return;
+      clearTargetHighlight();
+      isUndoRedoActive = true;
+      redoStack.push(undoStack.pop());
+      pageText.innerHTML = undoStack[undoStack.length - 1];
+      saveCurrentPage();
+      updateWordCount();
+      isUndoRedoActive = false;
+    }
+
+    function triggerRedo() {
+      if (isLocked || redoStack.length === 0) return;
+      clearTargetHighlight();
+      isUndoRedoActive = true;
+      const nextState = redoStack.pop();
+      undoStack.push(nextState);
+      pageText.innerHTML = nextState;
+      saveCurrentPage();
+      updateWordCount();
+      isUndoRedoActive = false;
+    }
+
+    pageText.addEventListener('focus', () => { 
+      if (!isLocked) navControls.style.display = 'none'; 
+    });
+    pageText.addEventListener('blur', () => { 
+      setTimeout(() => { navControls.style.display = 'flex'; }, 250); 
+    });
+
+    function applyCurrentFontSize() {
+      pageText.style.fontSize = currentFontSize + 'px';
+      underPage.style.fontSize = currentFontSize + 'px';
+
+      const formattedSpans = pageText.querySelectorAll('span, b, strong, u, h1, h2, h3');
+      formattedSpans.forEach(el => {
+        if (el.style.fontSize && !el.dataset.customSize) {
+          el.style.fontSize = ''; 
+        }
+      });
+
+      localStorage.setItem('history_book_font_size', currentFontSize);
+      changeBookFont(currentFontType);
+    }
+
+    function loadPageInstant(page) {
+      if (page < 1 || page > totalPages) return;
+      clearTargetHighlight();
+      currentPage = page;
+      localStorage.setItem('history_book_last_page', currentPage);
+
+      const savedData = localStorage.getItem('history_book_page_' + page) || '';
+      const savedBg = localStorage.getItem('history_book_bgcolor_page_' + page) || '#f4ece1';
+      
+      pageText.style.transition = 'none';
+      pageText.style.transform = '';
+      pageText.style.opacity = '1';
+      pageText.innerHTML = savedData;
+      
+      const notes = pageText.querySelectorAll('.history-note');
+      notes.forEach(note => {
+        if (!note.style.backgroundColor) {
+          note.style.backgroundColor = isDarkMode ? '#2c2c2c' : '#fffbf0';
+          note.style.border = isDarkMode ? '1px solid #555555' : '1px solid #d9cbaf';
+        }
+      });
+
+      if (isDarkMode) {
+        pageText.style.backgroundColor = '#1e1e1e';
+      } else {
+        pageText.style.backgroundColor = savedBg;
+      }
+
+      pageLabel.innerText = `पेज: ${page} / ${totalPages}`;
+      jumpInput.value = page;
+
+      underPage.style.display = 'none';
+      undoStack = [savedData];
+      redoStack = [];
+
+      prevBtn.disabled = (page === 1);
+      nextBtn.disabled = (page === totalPages);
+      applyCurrentFontSize();
+      updateWordCount();
+      pageText.scrollTop = 0;
+    }
+
+    let inputTimer = null;
+    pageText.addEventListener('input', () => {
+      if (!isLocked) {
+        saveCurrentPage();
+        updateWordCount();
+        clearTimeout(inputTimer);
+        inputTimer = setTimeout(() => { saveStateForUndo(); }, 400);
+      }
+    });
+
+    function saveCurrentPage() {
+      localStorage.setItem('history_book_page_' + currentPage, pageText.innerHTML);
+    }
+
+    window.addEventListener('beforeunload', () => {
+      saveCurrentPage();
+    });
+
+    function deleteParentItem(btn, selector) {
+      saveStateForUndo();
+      const el = btn.closest(selector);
+      if (el) { 
+        el.remove(); 
+        saveCurrentPage(); 
+        updateWordCount(); 
+      }
+    }
+
+    function insertVideoLink() {
+      const url = prompt('YouTube वीडियो का लिंक (URL) डालें:');
+      if (url && url.trim() !== '') {
+        saveStateForUndo();
+        const title = prompt('वीडियो का शीर्षक या बटन का नाम लिखें:', '▶️ वीडियो क्लास देखने के लिए यहाँ क्लिक करें');
+        const videoHtml = `<div class="video-card-wrapper" contenteditable="false"><button class="delete-item-btn" onclick="deleteParentItem(this, '.video-card-wrapper')">✕</button><a href="${url.trim()}" target="_blank" class="video-link-card"><span style="font-size: 20px;">📺</span><span>${title ? title.trim() : '▶️ वीडियो क्लास देखने के लिए यहाँ क्लिक करें'}</span></a></div><p><br></p>`;
+        insertHtmlAtSelection(videoHtml);
+      }
+    }
+
+    function insertHtmlAtSelection(html) {
+      pageText.focus();
+      const sel = window.getSelection();
+      let range;
+      if (sel && sel.rangeCount > 0 && pageText.contains(sel.anchorNode)) {
+        range = sel.getRangeAt(0);
+      } else {
+        range = document.createRange();
+        range.selectNodeContents(pageText);
+        range.collapse(false);
+      }
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = html;
+      const frag = document.createDocumentFragment();
+      let node, lastNode;
+      while ((node = tempDiv.firstChild)) { lastNode = frag.appendChild(node); }
+      range.deleteContents();
+      range.insertNode(frag);
+      if (lastNode) {
+        range = range.cloneRange();
+        range.setStartAfter(lastNode);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+      saveCurrentPage();
+      updateWordCount();
+    }
+
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        saveStateForUndo();
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const base64Img = e.target.result;
+          const imgHtml = `<div class="history-image-card" contenteditable="false"><button class="delete-item-btn" onclick="deleteParentItem(this, '.history-image-card')">✕</button><img src="${base64Img}"><div class="image-caption" contenteditable="true">चित्र: विवरण यहाँ लिखें...</div></div><p><br></p>`;
+          insertHtmlAtSelection(imgHtml);
+        };
+        reader.readAsDataURL(file);
+      }
+      event.target.value = '';
+    }
+
+    function handleMapUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        saveStateForUndo();
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const base64Img = e.target.result;
+          const mapHtml = `<div class="map-trigger-card" contenteditable="false" onclick="openMapModal('${base64Img}')">📍 🗺️ ऐतिहासिक मानचित्र देखने के लिए यहाँ क्लिक करें</div><p><br></p>`;
+          insertHtmlAtSelection(mapHtml);
+        };
+        reader.readAsDataURL(file);
+      }
+      event.target.value = '';
+    }
+
+    function openMapModal(src) { document.getElementById('modalImg').src = src; document.getElementById('mapModal').style.display = 'flex'; }
+    function closeMapModal() { document.getElementById('mapModal').style.display = 'none'; }
+
+    function toggleLockMode() {
+      isLocked = !isLocked;
+      clearTargetHighlight();
+      if (isLocked) {
+        document.body.classList.add('is-locked');
+        pageText.setAttribute('contenteditable', 'false');
+        authorBar.classList.add('hidden');
+        lockToggleBtn.innerText = '✏️ अनलॉक';
+        lockToggleBtn.style.background = '#8b5a2b';
+      } else {
+        document.body.classList.remove('is-locked');
+        pageText.setAttribute('contenteditable', 'true');
+        authorBar.classList.remove('hidden');
+        lockToggleBtn.innerText = '🔒 लॉक';
+        lockToggleBtn.style.background = '#2b5c8f';
+      }
+    }
+
+    function jumpToPage() {
+      const targetPage = parseInt(jumpInput.value);
+      if (targetPage >= 1 && targetPage <= totalPages) loadPageInstant(targetPage);
+      else alert('कृपया 1 से ' + totalPages + ' के बीच का पेज नंबर डालें।');
+    }
+
+    let touchStartX = 0, touchStartY = 0, isTrackingTouch = false, swipeDirection = 0, containerWidth = 360;
+    let initialPinchDistance = null;
+    let initialFontSize = currentFontSize;
+    let isPinching = false;
+
+    function getDistance(touches) {
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    bookStage.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        isPinching = true;
+        isTrackingTouch = false;
+        initialPinchDistance = getDistance(e.touches);
+        initialFontSize = currentFontSize;
+        pageText.style.transition = 'none';
+        pageText.style.transform = '';
+        underPage.style.display = 'none';
+        return;
+      }
+
+      if (e.touches.length === 1) {
+        if (!isSlideEnabled) return;
+        const sel = window.getSelection();
+        if (!isLocked && (document.activeElement === pageText || (sel && !sel.isCollapsed))) {
+          isTrackingTouch = false;
+          return;
+        }
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        containerWidth = bookStage.clientWidth || 360;
+        isTrackingTouch = true;
+        swipeDirection = 0;
+        pageText.style.transition = 'none';
+      }
+    }, { passive: false });
+
+    bookStage.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2 && isPinching && initialPinchDistance) {
+        e.preventDefault();
+        const currentDistance = getDistance(e.touches);
+        const scale = currentDistance / initialPinchDistance;
+        let targetSize = Math.round(initialFontSize * scale);
+        targetSize = Math.min(Math.max(targetSize, 12), 34);
+
+        if (targetSize !== currentFontSize) {
+          currentFontSize = targetSize;
+          applyCurrentFontSize();
+        }
+        return;
+      }
+
+      if (!isPinching && isSlideEnabled && isTrackingTouch && e.touches.length === 1) {
+        const diffX = e.touches[0].clientX - touchStartX;
+        const diffY = e.touches[0].clientY - touchStartY;
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 12) {
+          let progress = diffX / containerWidth;
+          progress = Math.max(-1, Math.min(1, progress));
+          if (progress < 0) {
+            if (currentPage >= totalPages) return;
+            if (swipeDirection !== 1) {
+              swipeDirection = 1;
+              underPage.innerHTML = localStorage.getItem('history_book_page_' + (currentPage + 1)) || '';
+              underPage.style.display = 'block';
+            }
+            const ratio = Math.abs(progress);
+            pageText.style.transformOrigin = 'left center';
+            pageText.style.transform = `translateX(${-ratio * (containerWidth * 0.45)}px) translateZ(${Math.sin(ratio * Math.PI) * 35}px) rotateY(${-ratio * 80}deg)`;
+          } else {
+            if (currentPage <= 1) return;
+            if (swipeDirection !== -1) {
+              swipeDirection = -1;
+              underPage.innerHTML = localStorage.getItem('history_book_page_' + (currentPage - 1)) || '';
+              underPage.style.display = 'block';
+            }
+            const ratio = progress;
+            pageText.style.transformOrigin = 'right center';
+            pageText.style.transform = `translateX(${ratio * (containerWidth * 0.45)}px) translateZ(${Math.sin(ratio * Math.PI) * 35}px) rotateY(${ratio * 80}deg)`;
+          }
+        }
+      }
+    }, { passive: false });
+
+    bookStage.addEventListener('touchend', (e) => {
+      if (e.touches.length < 2) {
+        if (isPinching) {
+          isPinching = false;
+          initialPinchDistance = null;
+          localStorage.setItem('history_book_font_size', currentFontSize);
+        }
+      }
+
+      if (isTrackingTouch && e.touches.length === 0) {
+        isTrackingTouch = false;
+        const progress = Math.abs(e.changedTouches[0].clientX - touchStartX) / containerWidth;
+        if (progress >= 0.25 && swipeDirection !== 0) {
+          pageText.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+          pageText.style.transform = `translateX(${swipeDirection === 1 ? '-' : ''}${containerWidth}px) rotateY(${swipeDirection === 1 ? '-' : ''}90deg)`;
+          pageText.style.opacity = '0';
+          setTimeout(() => { loadPageInstant(currentPage + swipeDirection); }, 200);
+        } else {
+          pageText.style.transition = 'transform 0.22s ease-out, opacity 0.22s ease';
+          pageText.style.transform = 'translateX(0px) translateZ(0px) rotateY(0deg)';
+          pageText.style.opacity = '1';
+          setTimeout(() => { underPage.style.display = 'none'; }, 220);
+        }
+      }
+    }, { passive: true });
+
+    function publishCompleteBook() {
+      saveCurrentPage();
+      const allPagesData = {};
+      const allPagesBg = {};
+      for (let i = 1; i <= totalPages; i++) {
+        let content = localStorage.getItem('history_book_page_' + i);
+        let bg = localStorage.getItem('history_book_bgcolor_page_' + i);
+        if (content && content.trim() !== '') {
+          content = content.replace(/<button class="delete-item-btn"[^>]*>.*?<\/button>/gi, '');
+          allPagesData[i] = content;
+        }
+        if (bg) {
+          allPagesBg[i] = bg;
+        }
+      }
+      let fullHtmlCode = document.documentElement.outerHTML;
+      const exportScript = `
+        <script>
+          const exportedBookData = ${JSON.stringify(allPagesData)};
+          const exportedBookBg = ${JSON.stringify(allPagesBg)};
+          window.loadPageInstant = function(page) {
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            pageText.innerHTML = exportedBookData[page] || '<h2 style="text-align:center; color:#777; margin-top:100px;">खाली पेज</h2>';
+            pageText.style.backgroundColor = isDarkMode ? '#1e1e1e' : (exportedBookBg[page] || '#f4ece1');
+            pageLabel.innerText = 'पेज: ' + page + '/' + totalPages;
+            jumpInput.value = page;
+            prevBtn.disabled = (page === 1);
+            nextBtn.disabled = (page === totalPages);
+            pageText.setAttribute('contenteditable', 'false');
+            applyCurrentFontSize();
+          };
+          window.addEventListener('DOMContentLoaded', () => { loadPageInstant(${currentPage}); });
+        <\/script>
+      `;
+      fullHtmlCode += exportScript;
+      const blob = new Blob([fullHtmlCode], { type: 'text/html;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const dlAnchorElem = document.createElement('a');
+      dlAnchorElem.setAttribute("href", url);
+      dlAnchorElem.setAttribute("download", "My_Digital_History_Book.html");
+      dlAnchorElem.click();
+    }
+
+    applyTheme();
+    applySavedBodyColors();
+    updateSlideButtonState();
+    loadPageInstant(currentPage);
+  </script>
+</body>
+</html>
