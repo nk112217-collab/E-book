@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>डिजिटल बुक पोर्टल - 3D एवं PDF किताबें और निशुल्क लेख</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+        }
+        header {
+            background: #0f172a;
+            color: #fff;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .logo {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #38bdf8;
+        }
+        .search-bar {
+            display: flex;
+            background: #fff;
+            border-radius: 6px;
+            overflow: hidden;
+            width: 100%;
+            max-width: 380px;
+            margin-top: 10px;
+        }
+        @media(min-width: 768px) {
+            .search-bar {
+                margin-top: 0;
+            }
+        }
+        .search-bar input {
+            padding: 0.5rem 1rem;
+            border: none;
+            outline: none;
+            width: 100%;
+            font-size: 0.95rem;
+        }
+        .search-bar button {
+            background: #0284c7;
+            border: none;
+            padding: 0.5rem 1rem;
+            color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .hero {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            text-align: center;
+            padding: 3.5rem 1rem;
+        }
+        .hero h1 {
+            font-size: 2.3rem;
+            margin-bottom: 0.8rem;
+            color: #f8fafc;
+        }
+        .hero p {
+            font-size: 1.15rem;
+            color: #94a3b8;
+            max-width: 700px;
+            margin: 0 auto 2rem auto;
+        }
+        .features-section {
+            background: #e0f2fe;
+            padding: 2rem 1rem;
+            margin: 2rem auto;
+            max-width: 1200px;
+            border-radius: 12px;
+            border: 1px solid #bae6fd;
+        }
+        .features-section h2 {
+            text-align: center;
+            color: #0369a1;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        .feature-box {
+            background: white;
+            padding: 1.2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .feature-box h4 {
+            color: #0f172a;
+            margin-bottom: 0.4rem;
+            font-size: 1.1rem;
+        }
+        .feature-box p {
+            font-size: 0.9rem;
+            color: #475569;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .section-title {
+            font-size: 1.7rem;
+            margin-bottom: 1.5rem;
+            color: #0f172a;
+            border-left: 5px solid #0284c7;
+            padding-left: 10px;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #e2e8f0;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.1);
+        }
+        .card-header-img {
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-align: center;
+            padding: 1rem;
+        }
+        .card-body {
+            padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .tag {
+            font-size: 0.75rem;
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .tag-free {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .card-body h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: #0f172a;
+        }
+        .card-body p {
+            color: #64748b;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+        .btn {
+            display: block;
+            background: #0284c7;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            text-decoration: none;
+            text-align: center;
+            font-weight: bold;
+            transition: background 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+        .btn:hover {
+            background: #0369a1;
+        }
+        .btn-disabled {
+            background: #94a3b8 !important;
+            cursor: not-allowed;
+        }
+        .btn-outline {
+            background: transparent;
+            color: #0284c7;
+            border: 2px solid #0284c7;
+            text-align: center;
+        }
+        .btn-outline:hover {
+            background: #0284c7;
+            color: white;
+        }
+        .article-categories {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .cat-chip {
+            background: #e2e8f0;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #334155;
+            cursor: pointer;
+        }
+        .cat-chip:hover {
+            background: #cbd5e1;
+        }
+        footer {
+            background: #0f172a;
+            color: #94a3b8;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+            font-size: 0.95rem;
+        }
+    </style>
+    <script>
+        function comingSoon() {
+            alert("यह डिजिटल किताब अभी तैयार हो रही है, यह जल्द ही उपलब्ध होगी!");
+        }
+    </script>
+</head>
+<body>
+
+    <header>
+        <div class="logo">📖 डिजिटल बुक पोर्टल</div>
+        <div class="search-bar">
+            <input type="text" placeholder="किताबें या लेख खोजें...">
+            <button>खोजें</button>
+        </div>
+    </header>
+
+    <section class="hero">
+        <h1>3D मॉडल एवं PDF किताबें और निशुल्क लेख</h1>
+        <p>प्रतियोगी परीक्षाओं के लिए अत्याधुनिक 3D इंटरएक्टिव किताबें, मानक PDF नोट्स और परीक्षा रणनीति से जुड़े विशेष लेख।</p>
+    </section>
+
+    <div class="container">
+        <div class="features-section">
+            <h2>✨ हमारी 3D मॉडल किताबों की विशेष विशेषताएं</h2>
+            <div class="features-grid">
+                <div class="feature-box">
+                    <h4>📖 3D पेज-फ्लिप अनुभव</h4>
+                    <p>बिल्कुल असली किताब की तरह पन्ने पलटने का जादुई और जीवंत अहसास जो पढ़ाई को बोरिंग नहीं होने देता।</p>
+                </div>
+                <div class="feature-box">
+                    <h4>🗺️ एचडी ऐतिहासिक मैप्स</h4>
+                    <p>इतिहास और भूगोल को गहराई से समझने के लिए उच्च गुणवत्ता वाले ज़ूम-इनेबल 3D और HD मानचित्र।</p>
+                </div>
+                <div class="feature-box">
+                    <h4>⚡ आधुनिक और इंटरएक्टिव</h4>
+                    <p>कस्टमाइज़ेबल टूल्स, बेहतरीन विजुअल्स और स्मार्ट नेविगेशन के साथ पढ़ने का बिल्कुल नया तरीका।</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <!-- BOOKS SECTION -->
+        <h2 class="section-title">📚 उपलब्ध डिजिटल किताबें (3D मॉडल एवं PDF)</h2>
+        <div class="grid-container">
+            <div class="card">
+                <div class="card-header-img" style="background: #fef3c7; color: #b45309;">
+                    📜 मुगल काल: 3D इंटरएक्टिव बुक
+                </div>
+                <div class="card-body">
+                    <div>
+                        <span class="tag">3D मॉडल बुक</span>
+                        <h3>भारतीय इतिहास - मुगल साम्राज्य</h3>
+                        <p>बाबर से औरंगजेब तक का संपूर्ण इतिहास, 3D मैप्स और 3D पेज-फ्लिप तकनीक के साथ।</p>
+                    </div>
+                    <a href="book.html" class="btn">3D किताब पढ़ें</a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header-img" style="background: #e0f2fe; color: #0369a1;">
+                    📑 मानक PDF अध्ययन सामग्री
+                </div>
+                <div class="card-body">
+                    <div>
+                        <span class="tag" style="background: #fef3c7; color: #b45309;">PDF फॉर्मेट</span>
+                        <h3>आधुनिक भारत का इतिहास (PDF नोट्स)</h3>
+                        <p>रिवीजन और त्वरित पढ़ाई के लिए उच्च गुणवत्ता वाले संरचित PDF नोट्स फॉर्मेट में।</p>
+                    </div>
+                    <button onclick="comingSoon()" class="btn btn-disabled">जल्द उपलब्ध होगी</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header-img" style="background: #f1f5f9; color: #334155;">
+                    📐 गणित एवं रीजनिंग PDF संग्रह
+                </div>
+                <div class="card-body">
+                    <div>
+                        <span class="tag" style="background: #fef3c7; color: #b45309;">PDF फॉर्मेट</span>
+                        <h3>SSC CGL गणित शॉर्टकट्स</h3>
+                        <p>कम समय में सवाल हल करने के शॉर्टकट फॉर्मूले और प्रैक्टिस सेट्स।</p>
+                    </div>
+                    <button onclick="comingSoon()" class="btn btn-disabled">जल्द उपलब्ध होगी</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- FREE ARTICLES SECTION -->
+        <h2 class="section-title" style="border-left-color: #16a34a; margin-top: 3rem;">✍️ निशुल्क लेख एवं गाइड (Free Articles)</h2>
+        
+        <div class="article-categories">
+            <span class="cat-chip" style="background: #16a34a; color: white;">सभी लेख</span>
+            <span class="cat-chip">🎯 परीक्षा की तैयारी कैसे करें?</span>
+            <span class="cat-chip">📜 ऐतिहासिक तथ्य एवं विश्लेषण</span>
+            <span class="cat-chip">💡 अध्ययन टिप्स और शॉर्टकट्स</span>
+        </div>
+
+        <div class="grid-container">
+            <!-- UP Police Article Card (Linked to up-police-guide.html) -->
+            <div class="card">
+                <div class="card-header-img" style="background: #dcfce7; color: #166534;">
+                    📝 रणनीति गाइड
+                </div>
+                <div class="card-body">
+                    <div>
+                        <span class="tag tag-free">निशुल्क लेख</span>
+                        <h3>UP Police ki Taiyari Kaise Kare</h3>
+                        <p>शारीरिक मानकों, सही लेवल की पहचान, सिलेबस और पिछले साल के पेपर्स के साथ पूरी रणनीति।</p>
+                    </div>
+                    <a href="up-police-guide.html" class="btn btn-outline">पूरा लेख पढ़ें</a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header-img" style="background: #f1f5f9; color: #334155;">
+                    🔍 इतिहास विशेष
+                </div>
+                <div class="card-body">
+                    <div>
+                        <span class="tag tag-free">निशुल्क लेख</span>
+                        <h3>मुगल काल में तंबाकू का आगमन और उसका प्रभाव</h3>
+                        <p>इतिहास के पन्नों से जानें कि कैसे भारत में तंबाकू आया और मुगलों के समय इसका क्या महत्व था।</p>
+                    </div>
+                    <button onclick="comingSoon()" class="btn btn-outline" style="border-color: #94a3b8; color: #94a3b8;">शीघ्र उपलब्ध</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header-img" style="background: #fef9c3; color: #854d0e;">
+                    ⏱️ टाइम मैनेजमेंट
+                </div>
+                <div class="card-body">
+                    <div>
+                        <span class="tag tag-free">निशुल्क लेख</span>
+                        <h3>पढ़ाई के दौरान फोकस कैसे बढ़ाएं?</h3>
+                        <p>लंबे समय तक बिना थके पढ़ाई करने और याद रखने के सबसे कारगर वैज्ञानिक तरीके।</p>
+                    </div>
+                    <button onclick="comingSoon()" class="btn btn-outline" style="border-color: #94a3b8; color: #94a3b8;">शीघ्र उपलब्ध</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>&copy; 2026 डिजिटल बुक पोर्टल | सभी अधिकार सुरक्षित</p>
+    </footer>
+
+</body>
+</html>
